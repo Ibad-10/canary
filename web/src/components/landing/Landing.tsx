@@ -7,58 +7,96 @@ import { ArrowRight } from "lucide-react";
 import { Hero, Nav } from "./Hero";
 import { Workflow } from "./Workflow";
 import { Bento } from "./Bento";
-import { CountUp, EASE, Reveal, type LandingData } from "./primitives";
+import { CountUp, EASE, Reveal, SectionHead, type CaseStudy, type LandingData } from "./primitives";
+import StatusPill from "@/components/StatusPill";
 import { s } from "./styles";
 
-function Metrics({ data }: { data: LandingData }) {
-  const live = [
-    { v: data.loans, l: "loans watched" },
-    { v: data.signals, l: "warning signals read" },
-    { v: data.comps, l: "comparables cited" },
-    { v: data.atRisk, l: "loans flagged now" },
-  ];
+const gbpM = (n: number) => (Math.abs(n) < 1e6 ? `£${Math.round(n / 1e3).toLocaleString("en-GB")}k` : `£${(n / 1e6).toFixed(1)}m`);
+const fmtMetric = (m: "icr" | "ltv", v: number | null) => (v == null ? "–" : m === "icr" ? `${v.toFixed(2)}x` : `${v.toFixed(1)}%`);
+const monthName = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : null);
+
+function CaseCard({ c, i }: { c: CaseStudy; i: number }) {
+  const label = c.metric === "icr" ? "Interest cover" : "Loan-to-value";
+  const breached = c.metric === "icr" ? (c.m6 ?? 9) < (c.limit ?? 0) : (c.m6 ?? 0) > (c.limit ?? 999);
   return (
-    <section className="px-6 md:px-12 py-20 md:py-24 border-y border-line bg-white/60">
-      <div className="max-w-[1280px] mx-auto">
-        <div className="grid gap-10 md:grid-cols-2">
-          <Reveal>
-            <p className="serif text-[64px] leading-none md:text-[88px]"><CountUp prefix="60–" value={90} suffix=" days" /></p>
-            <p className="text-[15px] leading-6 mt-4 max-w-[420px]">Covenants are tested quarterly, from borrower packs that arrive 60–90 days after the period.</p>
-            <p className="text-[12px] text-sub mt-2">Smart Capital Center, CRE covenant monitoring guide (2026)</p>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="serif text-[64px] leading-none md:text-[88px]"><CountUp value={125} suffix="%" /></p>
-            <p className="text-[15px] leading-6 mt-4 max-w-[420px]">UK buy-to-let lenders typically need rent to cover interest by at least 125%.</p>
-            <p className="text-[12px] text-sub mt-2">PRA Supervisory Statement SS13/16</p>
-          </Reveal>
+    <Reveal delay={i * 0.08} className="h-full">
+      <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.25 }} className="card h-full p-6 flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[12px] text-sub">{c.id} · {gbpM(c.amount)} at {c.ratePct}%</p>
+            <p className="font-medium text-[15px] leading-5 mt-1">{c.name}</p>
+          </div>
+          <StatusPill status={c.status} />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px mt-16 rounded-2xl overflow-hidden border border-line bg-line">
-          {live.map((t, i) => (
-            <Reveal key={t.l} delay={i * 0.06} className="bg-white p-6">
-              <p className="serif text-[44px] leading-none"><CountUp value={t.v} /></p>
-              <p className="text-[13px] text-sub mt-2">{t.l}</p>
-            </Reveal>
-          ))}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-xl bg-[#F6F3EC] p-3"><p className="text-[11px] text-sub">{label} now</p><p className="serif text-[22px] tnum">{fmtMetric(c.metric, c.now)}</p></div>
+          <div className="rounded-xl bg-[#F6F3EC] p-3"><p className="text-[11px] text-sub">Limit</p><p className="serif text-[22px] tnum">{fmtMetric(c.metric, c.limit)}</p></div>
+          <div className={`rounded-xl p-3 ${breached ? "bg-[#FBE9E7]" : "bg-[#FFF4D6]"}`}><p className="text-[11px] text-sub">In 6 months</p><p className="serif text-[22px] tnum">{fmtMetric(c.metric, c.m6)}</p></div>
         </div>
-        <p className="text-[12px] text-sub mt-3">Canary today, from the latest run. Real building, rent and market data; loan terms are synthetic.</p>
-      </div>
-    </section>
+        <div>
+          <p className="text-[12px] font-medium text-sub uppercase tracking-[0.1em]">Why</p>
+          <ul className="mt-2 space-y-1.5">
+            {c.drivers.map((d) => (
+              <li key={d.label} className="text-[13px] leading-5"><span>{d.label}</span> <span className="text-sub">— {d.effect}</span></li>
+            ))}
+          </ul>
+        </div>
+        <p className="mt-auto text-[13px] leading-5 border-t border-line pt-3">
+          {monthName(c.breachMonth)
+            ? <>Forecast breach <b>{monthName(c.breachMonth)}</b>. A quarterly borrower pack would show it 60–90 days after that.</>
+            : <>Heading for the cash-trap zone. Canary flags it now, before the next quarterly test.</>}
+        </p>
+        <Link href={`/desk/loan/${c.id}`} className="text-[13px] font-medium inline-flex items-center gap-1 hover:underline">See the evidence <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></Link>
+      </motion.div>
+    </Reveal>
   );
 }
 
-const TOOLS = ["V7 Go", "Cortile", "MSCI RCA", "Grok", "xAI", "Supabase", "cognee", "Parallel", "Vercel"];
-
-function Marquee() {
-  const row = [...TOOLS, ...TOOLS];
+function BusinessCase({ data }: { data: LandingData }) {
+  const ex = data.cases.find((c) => c.metric === "icr") ?? data.cases[0];
+  const interest = ex ? (ex.amount * ex.ratePct) / 100 : 0;
+  const need = ex?.limit && ex.metric === "icr" ? interest * ex.limit : null;
   return (
-    <section className="py-14" aria-label="Built with">
-      <p className="text-center text-[12px] uppercase tracking-[0.14em] text-sub">Built with</p>
-      <div className={`${s.marquee} mt-6 overflow-hidden`}>
-        <ul className={s.track}>
-          {row.map((t, i) => (
-            <li key={i} aria-hidden={i >= TOOLS.length} className="px-8 md:px-12 serif text-[28px] md:text-[34px] text-[#8E887C] hover:text-ink transition-colors whitespace-nowrap">{t}</li>
-          ))}
-        </ul>
+    <section id="case" className="px-6 md:px-12 py-20 md:py-24 border-y border-line bg-white/60">
+      <div className="max-w-[1280px] mx-auto">
+        <SectionHead eyebrow="The business case" title="Lenders find out about a breach months after it starts." sub="Here is why that happens, what it costs, and what Canary caught in this run." />
+
+        <div className="grid gap-px mt-12 md:grid-cols-3 rounded-2xl overflow-hidden border border-line bg-line">
+          <Reveal className="bg-white p-6 md:p-8">
+            <p className="serif text-[52px] leading-none md:text-[64px]"><CountUp prefix="60–" value={90} suffix=" days" /></p>
+            <p className="text-[14px] leading-6 mt-4"><b>The lag.</b> Covenants are tested quarterly, from borrower packs that arrive 60–90 days after the quarter ends. A problem that starts in month one can be five months old before anyone sees it.</p>
+            <p className="text-[11px] text-sub mt-3">Smart Capital Center, CRE covenant monitoring guide (2026)</p>
+          </Reveal>
+          <Reveal delay={0.08} className="bg-white p-6 md:p-8">
+            <p className="serif text-[52px] leading-none md:text-[64px]"><CountUp value={125} suffix="%" /></p>
+            <p className="text-[14px] leading-6 mt-4"><b>The thin margin.</b> Rent must typically cover interest by 125%.{ex && need ? <> On {ex.id}, {gbpM(ex.amount)} at {ex.ratePct}% costs {gbpM(interest)} a year in interest, so the building must earn at least {gbpM(need)}. A few empty units or a repair bill closes that gap fast.</> : null}</p>
+            <p className="text-[11px] text-sub mt-3">PRA Supervisory Statement SS13/16; example uses this run's loan terms</p>
+          </Reveal>
+          <Reveal delay={0.16} className="bg-white p-6 md:p-8">
+            <p className="serif text-[52px] leading-none md:text-[64px]">{gbpM(data.exposure.flagged)}</p>
+            <p className="text-[14px] leading-6 mt-4"><b>What's at stake here.</b> {data.atRisk} of {data.loans} loans ({gbpM(data.exposure.flagged)} of a {gbpM(data.exposure.total)} book) are flagged today from {data.signals} building signals: repairs, vacancies, arrears, overdue fire-safety items and local news.</p>
+            <p className="text-[11px] text-sub mt-3">Latest Canary run. Building and market data are real; the loan terms are synthetic.</p>
+          </Reveal>
+        </div>
+
+        {data.score && (
+          <Reveal className="mt-6">
+            <p className="text-[14px] leading-6 rounded-2xl border border-line bg-white px-5 py-4">
+              <b>Backtest:</b> using only data available on 31 May 2026, Canary caught {data.score.caught} of {data.score.total} loans that later moved into trouble, with {data.score.falseAlarms} false alarm{data.score.falseAlarms === 1 ? "" : "s"}.
+            </p>
+          </Reveal>
+        )}
+
+        {data.cases.length > 0 && (
+          <>
+            <h3 className="serif text-[28px] md:text-[34px] mt-16">Real examples from this run</h3>
+            <p className="text-[14px] text-sub mt-1">Each one traced to the building data that caused it.</p>
+            <div className="grid gap-5 mt-6 md:grid-cols-2 lg:grid-cols-3">
+              {data.cases.map((c, i) => <CaseCard key={c.id} c={c} i={i} />)}
+            </div>
+            <p className="text-[11px] text-sub mt-3">Value haircut sizes for safety and remediation items are model assumptions, shown on each loan&apos;s evidence page.</p>
+          </>
+        )}
       </div>
     </section>
   );
@@ -95,8 +133,7 @@ export default function Landing({ data, logo }: { data: LandingData; logo: React
       <div className="flex-1 flex flex-col overflow-x-clip">
         <Nav logo={logo} />
         <Hero data={data} />
-        <Marquee />
-        <Metrics data={data} />
+        <BusinessCase data={data} />
         <Workflow steps={data.steps} live={data.live} />
         <Bento data={data} />
         <FinalCta />

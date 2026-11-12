@@ -17,6 +17,22 @@ export type LandingData = {
   score: { caught: number; total: number; falseAlarms: number } | null;
   steps: { step: string; status: string }[];
   live: boolean;
+  exposure: { flagged: number; total: number };
+  cases: CaseStudy[];
+};
+
+export type CaseStudy = {
+  id: string;
+  name: string;
+  status: Status;
+  amount: number;
+  ratePct: number;
+  metric: "icr" | "ltv";
+  now: number | null;
+  limit: number | null;
+  m6: number | null;
+  breachMonth: string | null;
+  drivers: { label: string; effect: string }[];
 };
 
 export const EASE = [0.22, 1, 0.36, 1] as const;

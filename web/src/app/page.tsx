@@ -39,6 +39,28 @@ export default async function Page() {
     score: sc,
     steps: b.steps.length ? b.steps.map((s) => ({ step: s.step, status: s.status })) : FALLBACK_STEPS.map((s) => ({ step: s, status: "" })),
     live: b.steps.length > 0,
+    exposure: {
+      flagged: tiles.filter((f) => f.status !== "green").reduce((s, f) => s + (loanById.get(f.loan_id)?.amount_gbp ?? 0), 0),
+      total: b.loans.reduce((s, l) => s + (l.amount_gbp ?? 0), 0),
+    },
+    cases: tiles.filter((f) => f.status !== "green").slice(0, 3).map((f) => {
+      const l = loanById.get(f.loan_id);
+      const metric = f.breach_metric === "ltv" ? "ltv" : "icr";
+      const m = f.metrics[metric];
+      return {
+        id: f.loan_id,
+        name: l?.name ?? f.loan_id,
+        status: f.status,
+        amount: l?.amount_gbp ?? 0,
+        ratePct: l?.rate_pct ?? 0,
+        metric,
+        now: m?.now ?? null,
+        limit: m?.limit ?? null,
+        m6: m?.m6?.mid ?? null,
+        breachMonth: f.breach_month,
+        drivers: f.drivers.slice(0, 2).map((d) => ({ label: d.label.replace(/\s*\(ILLUSTRATIVE\)\s*/i, ""), effect: d.effect_text })),
+      };
+    }),
   };
 
   return <Landing data={data} logo={<Logo size={28} />} />;
