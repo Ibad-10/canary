@@ -158,24 +158,24 @@ export default function DashboardClient({ loans, forecasts, initialStatus }: { l
         {filtered && <button className="chip" onClick={clear}>Clear filters</button>}
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 2xl:grid-cols-2">
         <section className="card overflow-hidden" aria-labelledby="h-icr">
           <div className="px-4 pt-4">
-            <h2 id="h-icr" className="text-[15px] font-semibold"><Tip label="Interest cover" tip={METRIC_TIP.icr} />: now vs in 6 months</h2>
-            <p className="text-[12px] text-sub mt-0.5">Ring = now, dot = in 6 months, red bar = {L.limit.toLowerCase()}. Tightest {L.headroom.toLowerCase()} first.</p>
+            <h2 id="h-icr" className="text-[15px] font-semibold"><Tip label="Interest cover" tip={METRIC_TIP.icr} /> headroom</h2>
+            <p className="text-[12px] text-sub mt-0.5">How far each loan is from its limit in 6 months. Bars left of the line are past it.</p>
           </div>
           <div className="p-3"><HeadroomChart metric="icr" rows={chartRows("icr")} onOpen={open} /></div>
         </section>
         <section className="card overflow-hidden" aria-labelledby="h-ltv">
           <div className="px-4 pt-4">
-            <h2 id="h-ltv" className="text-[15px] font-semibold"><Tip label="Loan-to-value" tip={METRIC_TIP.ltv} />: now vs in 6 months</h2>
-            <p className="text-[12px] text-sub mt-0.5">Lower is safer. Headroom is how many points are left before the limit.</p>
+            <h2 id="h-ltv" className="text-[15px] font-semibold"><Tip label="Loan-to-value" tip={METRIC_TIP.ltv} /> headroom</h2>
+            <p className="text-[12px] text-sub mt-0.5">Percentage points left before the limit in 6 months. Tightest first.</p>
           </div>
           <div className="p-3"><HeadroomChart metric="ltv" rows={chartRows("ltv")} onOpen={open} /></div>
         </section>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
         <section className="card overflow-hidden" aria-labelledby="h-sec">
           <div className="px-4 pt-4"><h2 id="h-sec" className="text-[15px] font-semibold">Status by sector</h2><p className="text-[12px] text-sub mt-0.5">Click a bar to filter the table.</p></div>
           <SectorChart data={sectorData} onPick={(s) => setFSector(fSector === s ? null : s)} />

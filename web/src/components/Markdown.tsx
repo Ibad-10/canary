@@ -3,12 +3,13 @@ import { Flag } from "lucide-react";
 
 function inline(text: string, keyBase: string): ReactNode[] {
   const out: ReactNode[] = [];
-  const re = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[\^[^\]]+\])/g;
+  const re = /(\[[A-Z]+-\d+\/[A-Z]\d+\]|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[\^[^\]]+\])/g;
   let last = 0, i = 0, m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
     const t = m[0], k = `${keyBase}-${i++}`;
-    if (t.startsWith("**")) out.push(<b key={k}>{inline(t.slice(2, -2), k)}</b>);
+    if (/^\[[A-Z]+-\d+\/[A-Z]\d+\]$/.test(t)) out.push(<sup key={k} className="ml-0.5 px-1 py-px rounded bg-[#FFF6CC] border border-[#F5DC6E] text-[10px] font-medium text-gold whitespace-nowrap align-super">{t.slice(1, -1)}</sup>);
+    else if (t.startsWith("**")) out.push(<b key={k}>{inline(t.slice(2, -2), k)}</b>);
     else if (t.startsWith("[^")) { const n = t.slice(2, -1); out.push(<a key={k} href={`#fn${n}`} className="fnref">{n}</a>); }
     else if (t.startsWith("`")) out.push(<code key={k} className="px-1 rounded bg-[#F4F1EC] text-[13px]">{t.slice(1, -1)}</code>);
     else out.push(<i key={k}>{t.slice(1, -1)}</i>);
