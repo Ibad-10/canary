@@ -1,0 +1,34 @@
+﻿# --- secrets ---
+.env
+.env.*
+!.env.example
+web/.env*
+!web/.env.example
+.mcp-auth/
+.mcp-auth
+
+# --- restricted data (MSCI: never publish; Cortile: attendees only) ---
+data/
+msci_private/
+engine/cache/
+engine/out/
+web/public/data/
+CHAT_EXPORT.md
+
+# --- internal notes (contain attendee-only links) ---
+HANDOFF.md
+LINKS.md
+COMPETITORS.md
+
+# --- build / tooling ---
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+node_modules/
+web/node_modules/
+.next/
+web/.next/
+web/tsconfig.tsbuildinfo
+.vercel
+web/.vercel

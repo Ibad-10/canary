@@ -1,0 +1,8 @@
+﻿{
+  "mcpServers": {
+    "supabase": { "type": "http", "url": "https://mcp.supabase.com/mcp" },
+    "parallel-search": { "type": "http", "url": "https://search-mcp.parallel.ai/mcp" },
+    "parallel-task": { "type": "http", "url": "https://task-mcp.parallel.ai/mcp" },
+    "clerk": { "type": "http", "url": "https://mcp.clerk.com/mcp" }
+  }
+}

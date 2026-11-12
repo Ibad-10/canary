@@ -1,0 +1,7 @@
+﻿---
+alwaysApply: true
+---
+Read HANDOFF.md, LINKS.md and UI_DESIGN.md at the start. Never commit .env, data/ or msci_private/.
+
+- Model rule: strongest model (Opus) only for planning, architecture, maths and hard debugging; hand easy/routine tasks to smaller models or subagents. See HANDOFF.md.
+- Escalate the very hardest tasks to Claude Fable 5.2.

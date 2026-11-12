@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Canary — Loan early-warning desk (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Geist','ui-sans-serif','system-ui'],mono:['Geist Mono','ui-monospace','monospace']},
+colors:{bg:'#0A0B0D',panel:'#111317',line:'#1F232A',ink:'#E6E8EB',mute:'#8A919C',canary:'#FFD60A',ok:'#22C55E',watch:'#F59E0B',breach:'#EF4444',breachT:'#F87171'},
+borderRadius:{xl:'12px'}}}}
+</script>
+<style>
+/* Type scale (1.25-ish modular): 12 / 14 / 16 / 20 / 24 / 32 / 48 ; spacing on 8px grid */
+:root{--bg:#0A0B0D;--panel:#111317;--line:#1F232A}
+html,body{background:var(--bg);color:#E6E8EB;font-family:Geist,system-ui;-webkit-font-smoothing:antialiased}
+.num{font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+/* Aceternity-style grid + spotlight background */
+.grid-bg{background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:48px 48px;
+ -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 100%);mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 100%)}
+.spot{background:radial-gradient(600px 300px at 30% -40px,rgba(255,214,10,.08),transparent 70%)}
+/* Background beams */
+.beam{position:absolute;height:1px;width:240px;background:linear-gradient(90deg,transparent,rgba(255,214,10,.55),transparent);animation:beam 7s linear infinite;opacity:.6}
+@keyframes beam{0%{transform:translateX(-300px)}100%{transform:translateX(1500px)}}
+/* Moving glow border (hero) */
+.glow{position:relative;isolation:isolate}
+.glow::before{content:"";position:absolute;inset:-1px;border-radius:13px;padding:1px;background:conic-gradient(from var(--a),transparent 0 70%,rgba(239,68,68,.9) 80%,rgba(255,214,10,.9) 88%,transparent 95%);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 6s linear infinite;z-index:-1}
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes spin{to{--a:360deg}}
+.redglow{box-shadow:0 0 0 1px rgba(239,68,68,.35),0 0 32px -4px rgba(239,68,68,.35)}
+/* shimmer button (Magic UI style) */
+.shimmer{position:relative;overflow:hidden}
+.shimmer::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-100%);animation:sh 2.8s infinite}
+@keyframes sh{60%,100%{transform:translateX(100%)}}
+.tilt{transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .2s;transform-style:preserve-3d}
+.tilt:hover{border-color:#2C323B}
+.view{display:none}.view.on{display:block;animation:fade .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes fade{from{opacity:0;transform:translateY(8px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.row:hover{background:rgba(255,255,255,.025)}
+.navi{color:#8A919C}.navi:hover{color:#E6E8EB;background:rgba(255,255,255,.04)}
+.navi.on{color:#E6E8EB;background:rgba(255,255,255,.06);box-shadow:inset 2px 0 0 #FFD60A}
+input[type=range]{accent-color:#FFD60A}
+.fn{color:#FFD60A;font-family:'Geist Mono';font-size:12px;vertical-align:super;margin-left:1px;cursor:pointer}
+.pulse{animation:pl 2s infinite}@keyframes pl{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#1F232A;border-radius:8px}
+</style>
+</head>
+<body class="min-h-screen overflow-hidden">
+<div class="flex h-screen">
+ <!-- Sidebar -->
+ <aside class="w-[240px] shrink-0 border-r border-line bg-[#0C0D10] flex flex-col p-4">
+  <div class="flex items-center gap-2 px-2 h-10">
+   <svg width="28" height="28" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#FFD60A"/><path d="M9 19c0-5 3.6-9 8.4-9 2.6 0 4.6 1.4 5.6 3.4l3-.4-2.4 2.4c.2 4.6-3.4 8.6-8.6 8.6H9.6l2.4-2.2C10.2 21.4 9 20.4 9 19z" fill="#0A0B0D"/><circle cx="19.6" cy="14" r="1.2" fill="#FFD60A"/></svg>
+   <span class="text-base font-semibold tracking-tight">Canary</span>
+   <span class="ml-auto text-[12px] num text-mute border border-line rounded-md px-2">v0.1</span>
+  </div>
+  <div class="mt-6 text-[12px] uppercase tracking-wider text-mute px-2 mb-2">Desk</div>
+  <nav class="flex flex-col gap-1 text-sm" id="nav">
+   <button data-t="watchlist" class="navi on flex items-center gap-2 px-2 h-8 rounded-lg"><i data-lucide="radar" class="w-4 h-4"></i>Watchlist<span class="ml-auto num text-[12px] text-breachT">2</span></button>
+   <button data-t="loan" class="navi flex items-center gap-2 px-2 h-8 rounded-lg"><i data-lucide="building-2" class="w-4 h-4"></i>Loan detail</button>
+   <button data-t="memo" class="navi flex items-center gap-2 px-2 h-8 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i>Memo<span class="ml-auto text-[12px] text-canary">Draft</span></button>
+   <button data-t="log" class="navi flex items-center gap-2 px-2 h-8 rounded-lg"><i data-lucide="git-commit-vertical" class="w-4 h-4"></i>Step log</button>
+  </nav>
+  <div class="mt-6 text-[12px] uppercase tracking-wider text-mute px-2 mb-2">Sources</div>
+  <div class="flex flex-col gap-1 text-sm text-mute px-2">
+   <div class="flex items-center gap-2 h-8"><span class="w-2 h-2 rounded-full bg-ok"></span>Cortile buildings</div>
+   <div class="flex items-center gap-2 h-8"><span class="w-2 h-2 rounded-full bg-ok"></span>MSCI RCA comps</div>
+   <div class="flex items-center gap-2 h-8"><span class="w-2 h-2 rounded-full bg-ok"></span>Parallel news</div>
+   <div class="flex items-center gap-2 h-8"><span class="w-2 h-2 rounded-full bg-watch"></span>V7 Go contracts</div>
+   <div class="flex items-center gap-2 h-8"><span class="w-2 h-2 rounded-full bg-ok"></span>cognee memory</div>
+  </div>
+  <div class="mt-auto panel p-4 text-sm">
+   <div class="flex items-center gap-2 text-canary text-[12px] font-medium"><i data-lucide="flask-conical" class="w-4 h-4"></i>SYNTHETIC DATA</div>
+   <p class="text-mute text-[12px] mt-2 leading-5">All loans, borrowers and figures are fictional examples for the demo.</p>
+  </div>
+ </aside>
+
+ <main class="flex-1 relative overflow-y-auto">
+  <div class="absolute inset-x-0 top-0 h-[480px] grid-bg pointer-events-none"></div>
+  <div class="absolute inset-x-0 top-0 h-[480px] spot pointer-events-none"></div>
+  <div class="absolute inset-x-0 top-0 h-[480px] overflow-hidden pointer-events-none"><div class="beam" style="top:96px"></div><div class="beam" style="top:240px;animation-delay:-3s;animation-duration:9s"></div></div>
+  <!-- Top bar -->
+  <header class="relative h-16 border-b border-line flex items-center px-8 gap-4 bg-bg/60 backdrop-blur">
+   <div class="text-sm text-mute flex items-center gap-2">Book <i data-lucide="chevron-right" class="w-4 h-4"></i><span class="text-ink" id="crumb">Watchlist</span></div>
+   <span class="text-[12px] border border-canary/30 text-canary bg-canary/10 rounded-full px-2 h-6 inline-flex items-center gap-1"><i data-lucide="flask-conical" class="w-3 h-3"></i>Synthetic</span>
+   <button class="ml-auto flex items-center gap-2 h-8 w-[320px] px-3 rounded-lg border border-line bg-panel text-sm text-mute hover:border-[#2C323B] transition"><i data-lucide="search" class="w-4 h-4"></i>Search loans, buildings, sources…<span class="ml-auto num text-[12px] border border-line rounded px-1">⌘K</span></button>
+   <button class="h-8 w-8 grid place-items-center rounded-lg border border-line text-mute hover:text-ink"><i data-lucide="bell" class="w-4 h-4"></i></button>
+   <div class="h-8 w-8 rounded-full bg-gradient-to-br from-canary to-watch text-bg text-[12px] font-semibold grid place-items-center">IZ</div>
+  </header>
+
+  <div class="relative px-8 py-8 max-w-[1200px]">
+  <!-- ============ WATCHLIST ============ -->
+  <section id="v-watchlist" class="view on">
+   <div class="flex items-end justify-between">
+    <div><h1 class="text-[32px] leading-10 font-semibold tracking-tight">Watchlist</h1>
+    <p class="text-mute text-sm mt-1">Mixed book · 9 residential · 3 commercial · last scan <span class="num text-ink">19:04</span> GMT</p></div>
+    <div class="flex gap-2">
+     <button class="h-8 px-3 rounded-lg border border-line text-sm text-ink hover:bg-white/5 flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i>Export</button>
+     <button class="shimmer h-8 px-4 rounded-lg bg-canary text-bg text-sm font-semibold flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i>Run scan</button>
+    </div>
+   </div>
+   <div class="grid grid-cols-4 gap-4 mt-6" id="kpis"></div>
+   <div class="grid grid-cols-[1fr_280px] gap-4 mt-4">
+    <div class="panel overflow-hidden">
+     <div class="flex items-center h-12 px-4 border-b border-line gap-2 text-sm">
+      <span class="font-medium">Loans</span><span class="num text-mute text-[12px]">12</span>
+      <div class="ml-4 flex gap-1 text-[12px]"><span class="px-2 h-6 inline-flex items-center rounded-md bg-white/5">All</span><span class="px-2 h-6 inline-flex items-center rounded-md text-mute">Residential</span><span class="px-2 h-6 inline-flex items-center rounded-md text-mute">Commercial</span></div>
+      <span class="ml-auto text-mute text-[12px] flex items-center gap-1"><i data-lucide="arrow-down-up" class="w-3 h-3"></i>Months to breach</span>
+     </div>
+     <table class="w-full text-sm">
+      <thead class="text-[12px] text-mute"><tr class="border-b border-line">
+       <th class="text-left font-medium px-4 h-8">Loan</th><th class="text-left font-medium">Type</th><th class="text-right font-medium">LTV now → fcst</th><th class="text-right font-medium pl-4">ICR</th><th class="text-right font-medium pl-4">Occ.</th><th class="text-center font-medium pl-4">Trend</th><th class="text-right font-medium">To breach</th><th class="text-left font-medium pl-4 pr-4">Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+     </table>
+    </div>
+    <div class="flex flex-col gap-4">
+     <div class="panel p-4">
+      <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-canary"></i>Stress test</div>
+      <p class="text-[12px] text-mute mt-1">Re-forecasts every covenant live.</p>
+      <div class="mt-4 text-[12px] flex justify-between"><span class="text-mute">Rates</span><span class="num text-ink" id="rv">+2.0%</span></div>
+      <input type="range" min="0" max="40" value="20" class="w-full mt-2" oninput="document.getElementById('rv').textContent='+'+(this.value/10).toFixed(1)+'%'">
+      <div class="mt-4 text-[12px] flex justify-between"><span class="text-mute">Values</span><span class="num text-ink" id="vv">−10%</span></div>
+      <input type="range" min="0" max="30" value="10" class="w-full mt-2" oninput="document.getElementById('vv').textContent='−'+this.value+'%'">
+      <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+       <div class="rounded-lg bg-white/[.03] border border-line py-2"><div class="num text-base text-ok">6</div><div class="text-[12px] text-mute">OK</div></div>
+       <div class="rounded-lg bg-white/[.03] border border-line py-2"><div class="num text-base text-watch">3</div><div class="text-[12px] text-mute">Watch</div></div>
+       <div class="rounded-lg bg-breach/10 border border-breach/30 py-2"><div class="num text-base text-breachT">3</div><div class="text-[12px] text-mute">Breach</div></div>
+      </div>
+      <p class="text-[12px] text-mute mt-2">Under stress, <span class="text-ink">CN-022</span> flips amber → red.</p>
+     </div>
+     <div class="panel p-4">
+      <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="activity" class="w-4 h-4 text-canary"></i>Live signals</div>
+      <ul class="mt-2 text-[12px] space-y-2" id="feed"></ul>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- ============ LOAN DETAIL ============ -->
+  <section id="v-loan" class="view">
+   <div class="flex items-end justify-between">
+    <div>
+     <div class="flex items-center gap-2 text-[12px] text-mute"><span class="num">CN-014</span>·<span>Build-to-rent</span>·<span>Senior, £14.5m</span></div>
+     <h1 class="text-[32px] leading-10 font-semibold tracking-tight mt-1">Riverside BTR, Manchester</h1>
+    </div>
+    <div class="flex items-center gap-2">
+     <span class="pulse inline-flex items-center gap-2 h-8 px-3 rounded-full bg-breach/10 border border-breach/40 text-breachT text-sm font-medium"><span class="w-2 h-2 rounded-full bg-breach"></span>Forecast breach · ICR in ~3 months</span>
+    </div>
+   </div>
+   <div class="grid grid-cols-[272px_1fr_320px] gap-4 mt-6">
+    <div class="flex flex-col gap-4" id="gauges"></div>
+    <div class="panel glow redglow overflow-hidden relative" style="height:600px">
+     <div class="absolute top-0 inset-x-0 h-12 flex items-center px-4 text-sm border-b border-line bg-panel/80 backdrop-blur z-10">
+      <i data-lucide="share-2" class="w-4 h-4 text-canary mr-2"></i><span class="font-medium">Reasoning graph</span>
+      <span class="ml-auto text-[12px] text-mute flex items-center gap-4"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-breach"></span>Breach path</span><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#3A404A]"></span>Other</span><span id="gmode" class="num border border-line rounded px-1">3D</span></span>
+     </div>
+     <div id="graph" class="absolute inset-0 top-12"></div>
+     <div class="absolute bottom-4 left-4 text-[12px] text-mute z-10 flex gap-2"><span class="border border-line rounded-md px-2 h-6 inline-flex items-center bg-bg/70">Loan → Buildings → Signals → Covenant</span></div>
+    </div>
+    <div class="panel flex flex-col" style="height:600px">
+     <div class="h-12 flex items-center px-4 border-b border-line text-sm"><i data-lucide="file-search" class="w-4 h-4 text-canary mr-2"></i><span class="font-medium">Evidence</span><span class="ml-auto num text-[12px] text-mute">7 sources</span></div>
+     <div class="p-4 space-y-2 overflow-y-auto" id="evidence"></div>
+    </div>
+   </div>
+  </section>
+
+  <!-- ============ MEMO ============ -->
+  <section id="v-memo" class="view">
+   <div class="flex items-end justify-between">
+    <div><div class="text-[12px] text-mute flex items-center gap-2"><i data-lucide="sparkles" class="w-3 h-3 text-canary"></i>Drafted by Canary Analyst · 12 Nov 2026, 19:05 GMT</div>
+    <h1 class="text-[32px] leading-10 font-semibold tracking-tight mt-1">Watchlist memo — CN-014</h1></div>
+    <div class="flex gap-2">
+     <button class="h-8 px-3 rounded-lg border border-breach/40 text-breachT text-sm hover:bg-breach/10 flex items-center gap-2"><i data-lucide="x" class="w-4 h-4"></i>Reject</button>
+     <button class="h-8 px-3 rounded-lg border border-line text-sm hover:bg-white/5 flex items-center gap-2"><i data-lucide="pencil" class="w-4 h-4"></i>Edit</button>
+     <button class="shimmer h-8 px-4 rounded-lg bg-canary text-bg text-sm font-semibold flex items-center gap-2"><i data-lucide="check" class="w-4 h-4"></i>Approve</button>
+    </div>
+   </div>
+   <div class="grid grid-cols-[1fr_320px] gap-4 mt-6">
+    <article class="panel p-8 text-base leading-7 text-[#C9CDD3]">
+     <div class="flex items-center gap-2 mb-6">
+      <span class="text-[12px] border border-breach/40 text-breachT bg-breach/10 rounded-full px-2 h-6 inline-flex items-center">Recommend: move to Watchlist — Red</span>
+      <span class="text-[12px] border border-canary/30 text-canary bg-canary/10 rounded-full px-2 h-6 inline-flex items-center">Synthetic</span>
+     </div>
+     <h2 class="text-xl font-semibold text-ink">Summary</h2>
+     <p class="mt-2">Riverside BTR (fictional, 214 units) is forecast to breach its <b class="text-ink">1.50x ICR covenant</b> in about <span class="tabular-nums font-medium text-ink">3 months</span>. Rental income is falling as arrears rise to <span class="tabular-nums font-medium text-ink">6.8%</span> of rent roll<span class="fn">1</span> while service-charge overspend reaches <span class="tabular-nums font-medium text-ink">£212k</span> year to date<span class="fn">2</span>.</p>
+     <h2 class="text-xl font-semibold text-ink mt-6">What changed</h2>
+     <ul class="mt-2 space-y-2 list-none">
+      <li class="flex gap-2"><span class="text-breachT">●</span><span>Fire risk assessment at Block B is <span class="tabular-nums font-medium text-ink">47 days</span> overdue and EWS1 is pending<span class="fn">3</span> — refinancing risk.</span></li>
+      <li class="flex gap-2"><span class="text-watch">●</span><span>Estimated value range <span class="tabular-nums font-medium text-ink">£20.1m–£21.8m</span> from comparable sales<span class="fn">4</span>, putting LTV at <span class="tabular-nums font-medium text-ink">66–72%</span> vs a 70% limit<span class="fn">5</span>.</span></li>
+      <li class="flex gap-2"><span class="text-watch">●</span><span>Largest commercial tenant (ground-floor gym) reported store closures in news<span class="fn">6</span>.</span></li>
+     </ul>
+     <h2 class="text-xl font-semibold text-ink mt-6">Recommended actions</h2>
+     <ol class="mt-2 space-y-2 list-decimal pl-6"><li>Request updated rent roll and arrears ageing from borrower (draft chase ready).</li><li>Commission desktop valuation before Q1 test date.</li><li>Add to credit committee agenda, 26 Nov.</li></ol>
+     <div class="mt-8 pt-4 border-t border-line text-[12px] text-mute space-y-1 num">
+      <div><span class="text-canary">1</span> Cortile · bld_0042 · lease_arrears · 2026-11-10</div>
+      <div><span class="text-canary">2</span> Cortile · bld_0042 · svc_charge_ledger</div>
+      <div><span class="text-canary">3</span> Cortile · bld_0043 · compliance (FRA, EWS1)</div>
+      <div><span class="text-canary">4</span> MSCI RCA comp set · 6 deals (not shown publicly)</div>
+      <div><span class="text-canary">5</span> Loan agreement p.14 cl.21.2 (synthetic)</div>
+      <div><span class="text-canary">6</span> News · Parallel search · 2026-11-08</div>
+     </div>
+    </article>
+    <div class="flex flex-col gap-4">
+     <div class="panel p-4">
+      <div class="text-sm font-medium flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-canary"></i>Analyst corrections</div>
+      <div class="mt-4 rounded-lg border border-line bg-bg p-4 text-[12px] leading-5">
+       <div class="text-mute line-through">“Gym tenant is 18% of income”</div>
+       <div class="text-ink mt-1">→ “Gym is 4% of income; residential drives the ICR.”</div>
+       <div class="text-mute mt-2 num">J. Okafor · 19:06</div>
+      </div>
+     </div>
+     <div class="panel p-4">
+      <div class="text-sm font-medium flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-canary"></i>Borrower chase <span class="ml-auto text-[12px] text-mute">Draft · not sent</span></div>
+      <p class="text-[12px] text-mute mt-2 leading-5">“Ahead of the Q1 covenant test, please share the current rent roll and arrears ageing for Riverside Blocks A–C by 19 Nov…”</p>
+     </div>
+     <div class="panel p-4">
+      <div class="text-sm font-medium">Confidence</div>
+      <div class="flex items-end gap-2 mt-2"><span class="num text-[32px] leading-10">0.82</span><span class="text-[12px] text-mute mb-1">6 of 6 claims sourced</span></div>
+      <div class="h-2 rounded-full bg-white/5 mt-2"><div class="h-2 rounded-full bg-gradient-to-r from-watch to-canary" style="width:82%"></div></div>
+     </div>
+    </div>
+   </div>
+   <div id="toast" class="fixed bottom-8 right-8 panel px-4 h-12 flex items-center gap-2 text-sm shadow-2xl" style="box-shadow:0 16px 48px rgba(0,0,0,.5)">
+    <span class="w-6 h-6 rounded-full bg-ok/15 grid place-items-center"><i data-lucide="check" class="w-4 h-4 text-ok"></i></span>Analyst correction saved to memory<span class="text-mute text-[12px] ml-2 num">cognee</span>
+   </div>
+  </section>
+
+  <!-- ============ STEP LOG ============ -->
+  <section id="v-log" class="view">
+   <div><h1 class="text-[32px] leading-10 font-semibold tracking-tight">Step log — CN-014</h1>
+   <p class="text-mute text-sm mt-1">Every step, owner and decision. Total cycle <span class="num text-ink">41s</span> machine + <span class="num text-ink">3m</span> review <span class="text-[12px] text-canary ml-1">(example)</span></p></div>
+   <div class="grid grid-cols-[1fr_360px] gap-4 mt-6">
+    <div class="panel p-8"><ol class="relative" id="timeline"></ol></div>
+    <div class="flex flex-col gap-4">
+     <div class="panel glow p-6">
+      <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="target" class="w-4 h-4 text-canary"></i>Accuracy<span class="ml-auto text-[12px] border border-canary/30 text-canary bg-canary/10 rounded-full px-2 h-6 inline-flex items-center">example</span></div>
+      <p class="text-[12px] text-mute mt-1">20 breaches planted in the synthetic book.</p>
+      <div class="flex items-center gap-6 mt-6">
+       <svg width="112" height="112" viewBox="0 0 112 112"><circle cx="56" cy="56" r="48" stroke="#1F232A" stroke-width="10" fill="none"/><circle cx="56" cy="56" r="48" stroke="#FFD60A" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="271 302" transform="rotate(-90 56 56)" style="filter:drop-shadow(0 0 8px rgba(255,214,10,.45))"/><text x="56" y="62" text-anchor="middle" fill="#E6E8EB" font-family="Geist Mono" font-size="20">90%</text></svg>
+       <div class="space-y-2 text-sm">
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-ok"></span>Caught<span class="num ml-4 text-ink" data-tick="18">18</span><span class="num text-mute">/20</span></div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-breach"></span>Missed<span class="num ml-4 text-ink">2</span></div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-watch"></span>False alarms<span class="num ml-2 text-ink">1</span></div>
+       </div>
+      </div>
+     </div>
+     <div class="panel p-6">
+      <div class="text-sm font-medium">Cycle time</div>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+       <div><div class="num text-[32px] leading-10 text-canary">41s</div><div class="text-[12px] text-mute">Canary build</div></div>
+       <div><div class="num text-[32px] leading-10 text-mute">~2d</div><div class="text-[12px] text-mute">Manual (estimate)</div></div>
+      </div>
+      <p class="text-[12px] text-mute mt-4">Timings shown are placeholders until measured live.</p>
+     </div>
+    </div>
+   </div>
+  </section>
+  </div>
+ </main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const spark=(pts,c,w=80,h=24)=>{const mx=Math.max(...pts),mn=Math.min(...pts);const p=pts.map((v,i)=>`${(i/(pts.length-1)*w).toFixed(1)},${(h-2-(v-mn)/((mx-mn)||1)*(h-4)).toFixed(1)}`).join(' ');
+ const id='g'+Math.random().toString(36).slice(2,7);
+ return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".3"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs><polygon points="0,${h} ${p} ${w},${h}" fill="url(#${id})"/><polyline points="${p}" fill="none" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/></svg>`};
+// KPIs
+const K=[['Loans monitored',12,'','#8A919C',[10,10,11,11,12,12,12],'scan-eye','9 resi · 3 comm'],['On watch',4,'','#F59E0B',[1,1,2,2,3,3,4],'eye','+1 this week'],['Forecast breaches',2,'','#EF4444',[0,0,0,1,1,1,2],'triangle-alert','next in ~3 mo'],['Exposure at risk',48.2,'£','#FFD60A',[21,24,24,31,38,44,48.2],'pound-sterling','of £186.4m book']];
+$('#kpis').innerHTML=K.map(([l,v,pre,c,s,ic,sub],i)=>`<div class="tilt panel p-4 ${i==2?'glow':''}" style="${i==2?'box-shadow:0 0 32px -12px rgba(239,68,68,.5)':''}">
+ <div class="flex items-center gap-2 text-[12px] text-mute"><i data-lucide="${ic}" class="w-4 h-4"></i>${l}</div>
+ <div class="flex items-end justify-between mt-2"><div class="num text-[32px] leading-10 font-medium" style="color:${i==2?'#F87171':'#E6E8EB'}">${pre}<span data-tick="${v}">${v}</span>${pre?'m':''}</div>${spark(s,c)}</div>
+ <div class="text-[12px] text-mute mt-1">${sub}</div></div>`).join('');
+// Loans
+const L=[
+['CN-014','Riverside BTR','Manchester','BTR',64,68,1.42,91,3,'breach',[60,61,62,63,64,66,68]],
+['CN-031','Quayside Offices','Leeds','Office',61,69,1.38,78,5,'breach',[55,57,58,60,61,65,69]],
+['CN-022','Canal Street Student','Birmingham','Student',58,64,1.61,88,8,'watch',[52,54,55,56,58,61,64]],
+['CN-007','Hartley Court BTL','Bristol','BTL block',55,60,1.70,94,11,'watch',[50,52,53,54,55,57,60]],
+['CN-019','Market Row Retail','Sheffield','Retail',57,62,1.66,85,12,'watch',[54,54,55,56,57,59,62]],
+['CN-003','Aldgate Lofts','London','BTR',52,55,1.88,97,null,'ok',[50,51,51,52,52,53,55]],
+['CN-011','Ferry Lane Student','Glasgow','Student',49,51,2.02,99,null,'ok',[48,48,49,49,49,50,51]],
+['CN-025','Kingsway BTR','Liverpool','BTR',54,56,1.79,95,null,'ok',[53,53,54,54,54,55,56]],
+['CN-028','Elm Park BTL','Leicester','BTL block',47,49,2.10,96,null,'ok',[46,46,47,47,47,48,49]],
+['CN-033','Northgate Office','Cambridge','Office',50,53,1.95,92,null,'ok',[49,49,50,50,50,51,53]],
+['CN-036','Wharf Yard BTR','Newcastle','BTR',51,52,1.84,96,null,'ok',[50,50,51,51,51,51,52]],
+['CN-040','St Anne Student','Nottingham','Student',53,55,1.77,93,null,'ok',[52,52,53,53,53,54,55]]];
+const col={breach:'#EF4444',watch:'#F59E0B',ok:'#22C55E'},lab={breach:'Breach',watch:'Watch',ok:'Healthy'};
+const comm=t=>['Office','Retail'].includes(t);
+$('#rows').innerHTML=L.map(([id,n,c,t,l0,l1,icr,occ,m,st,s])=>`<tr class="row border-b border-line/70 last:border-0 h-10 cursor-pointer transition" ${st=='breach'?'style="background:linear-gradient(90deg,rgba(239,68,68,.07),transparent 40%)"':''} onclick="go('loan')">
+ <td class="px-4"><div class="flex items-center gap-2"><span class="num text-mute text-[12px] w-12">${id}</span><span class="text-ink">${n}</span><span class="text-[12px] text-mute">· ${c}</span></div></td>
+ <td><span class="text-[12px] px-2 h-6 inline-flex items-center rounded-md border ${comm(t)?'border-[#3B82F6]/30 text-[#93C5FD] bg-[#3B82F6]/10':'border-line text-[#C9CDD3] bg-white/[.03]'}">${t}</span></td>
+ <td class="text-right num">${l0}% <span class="text-mute">→</span> <span style="color:${l1>=70?'#F87171':l1>=60?'#F59E0B':'#E6E8EB'}">${l1}%</span></td>
+ <td class="text-right num pl-4" style="color:${icr<1.5?'#F87171':'#E6E8EB'}">${icr.toFixed(2)}x</td>
+ <td class="text-right num pl-4" style="color:${occ<85?'#F59E0B':'#E6E8EB'}">${occ}%</td>
+ <td class="text-center pl-4"><div class="inline-block align-middle">${spark(s,col[st],64,20)}</div></td>
+ <td class="text-right num ${m?'text-ink':'text-mute'}">${m?m+' mo':'—'}</td>
+ <td class="pl-4 pr-4"><span class="inline-flex items-center gap-1 h-6 px-2 rounded-full text-[12px] font-medium" style="color:${st=='breach'?'#F87171':col[st]};background:${col[st]}1A;border:1px solid ${col[st]}40"><span class="w-2 h-2 rounded-full ${st=='breach'?'pulse':''}" style="background:${col[st]}"></span>${lab[st]}</span></td></tr>`).join('');
+$('#feed').innerHTML=[['#EF4444','FRA overdue 47d','bld_0043 · CN-014'],['#F59E0B','Arrears 6.8% ↑','bld_0042 · CN-014'],['#F59E0B','Anchor tenant news','Quayside · CN-031'],['#22C55E','EICR renewed','bld_0107 · CN-003']].map(([c,a,b])=>`<li class="flex items-start gap-2"><span class="w-2 h-2 rounded-full mt-1" style="background:${c}"></span><div><div class="text-ink">${a}</div><div class="text-mute num">${b}</div></div></li>`).join('');
+// Gauges
+const G=[['LTV','68%','70% max',68/80,70/80,[66/80,72/80],'#F59E0B','Forecast range 66–72%'],['ICR','1.42x','1.50x min',1.42/2.5,1.5/2.5,null,'#EF4444','Breach in ~3 months'],['Occupancy','91%','85% min',.91,.85,null,'#22C55E','Headroom 6 pts']];
+$('#gauges').innerHTML=G.map(([n,v,lim,p,lp,rng,c,sub])=>`<div class="panel p-4 ${c=='#EF4444'?'redglow':''}">
+ <div class="flex justify-between text-[12px] text-mute"><span>${n}</span><span class="num">${lim}</span></div>
+ <div class="num text-2xl mt-1" style="color:${c=='#EF4444'?'#F87171':'#E6E8EB'}">${v}</div>
+ <div class="relative h-2 rounded-full bg-white/5 mt-4">
+  ${rng?`<div class="absolute h-2 rounded-full" style="left:${rng[0]*100}%;width:${(rng[1]-rng[0])*100}%;background:repeating-linear-gradient(45deg,${c}55 0 4px,transparent 4px 8px)"></div>`:''}
+  <div class="absolute h-2 rounded-full" style="width:${p*100}%;background:${c};box-shadow:0 0 12px ${c}88"></div>
+  <div class="absolute -top-1 h-4 w-[2px] bg-ink" style="left:${lp*100}%"></div>
+ </div>
+ <div class="text-[12px] text-mute mt-2">${sub}</div></div>`).join('')+`<div class="panel p-4"><div class="text-[12px] text-mute">Loan</div><div class="text-sm mt-1 space-y-1"><div class="flex justify-between"><span class="text-mute">Balance</span><span class="num">£14.5m</span></div><div class="flex justify-between"><span class="text-mute">Rate</span><span class="num">SONIA + 3.1%</span></div><div class="flex justify-between"><span class="text-mute">Maturity</span><span class="num">Sep 2028</span></div><div class="flex justify-between"><span class="text-mute">Next test</span><span class="num text-canary">31 Mar 2027</span></div></div></div>`;
+// Evidence
+const E=[['ICR 1.42x','Loan agreement p.14 cl.21.2','file-text','#FFD60A'],['Arrears 6.8% of rent roll','Cortile · bld_0042 · leases','database','#22C55E'],['FRA overdue 47 days','Cortile · bld_0043 · compliance','shield-alert','#EF4444'],['EWS1 pending','Cortile · bld_0043 · compliance','flame','#EF4444'],['Service charge +£212k','Cortile · bld_0042 · svc_charge','receipt','#F59E0B'],['Value £20.1–21.8m','MSCI RCA comp','line-chart','#93C5FD'],['Gym operator closures','News · parallel','newspaper','#F59E0B']];
+$('#evidence').innerHTML=E.map(([f,s,ic,c],i)=>`<div class="rounded-lg border border-line bg-bg/60 p-4 hover:border-[#2C323B] transition">
+ <div class="flex items-center gap-2"><span class="num text-[12px] text-canary">${i+1}</span><span class="text-sm text-ink">${f}</span></div>
+ <span class="mt-2 inline-flex items-center gap-1 h-6 px-2 rounded-md text-[12px] num border" style="color:${c=='#EF4444'?'#F87171':c};border-color:${c}40;background:${c}12"><i data-lucide="${ic}" class="w-3 h-3"></i>${s}</span></div>`).join('');
+// Timeline
+const T=[['Data pulled','Canary agent','CA','19:04:12','6.2 s','database','Cortile 3 bldgs · MSCI 6 comps · 4 news items'],['Signals scored','Canary agent','CA','19:04:18','2.1 s','activity','9 signals, 3 critical'],['Breach forecast','Rules engine','RE','19:04:20','0.4 s','triangle-alert','ICR 1.42x < 1.50x in ~3 months'],['Memo drafted','Canary Analyst','AI','19:04:21','18.7 s','file-text','6 claims, 6 sources'],['Borrower chase drafted','Canary Analyst','AI','19:04:40','11.9 s','mail','Draft only — not sent'],['Analyst approved','J. Okafor','JO','19:07:52','3 m 12 s','badge-check','1 correction → memory']];
+$('#timeline').innerHTML=T.map(([a,o,ini,t,d,ic,note],i)=>`<li class="relative pl-12 ${i<T.length-1?'pb-8':''}">
+ ${i<T.length-1?'<span class="absolute left-[15px] top-8 bottom-0 w-px bg-gradient-to-b from-canary/60 to-line"></span>':''}
+ <span class="absolute left-0 top-0 w-8 h-8 rounded-full grid place-items-center border ${i==T.length-1?'bg-ok/15 border-ok/40 text-ok':'bg-canary/10 border-canary/30 text-canary'}"><i data-lucide="${ic}" class="w-4 h-4"></i></span>
+ <div class="flex items-center gap-2"><span class="text-base font-medium text-ink">${a}</span><span class="ml-auto num text-[12px] text-mute">${t} GMT</span></div>
+ <div class="flex items-center gap-2 mt-1 text-sm text-mute"><span class="w-6 h-6 rounded-full grid place-items-center text-[12px] font-semibold ${ini=='JO'?'bg-[#3B82F6]/20 text-[#93C5FD]':'bg-white/5 text-ink'}">${ini}</span>${o}<span>·</span>${note}<span class="ml-auto num text-[12px] border border-line rounded-md px-2 h-6 inline-flex items-center text-ink">${d}</span></div></li>`).join('');
+lucide.createIcons();
+// Number tickers (Magic UI-style)
+function tick(){document.querySelectorAll('.view.on [data-tick]').forEach(el=>{const to=+el.dataset.tick,dec=String(to).includes('.')?1:0,t0=performance.now();
+ const f=n=>{const k=Math.min(1,(n-t0)/900),e=1-Math.pow(1-k,3);el.textContent=(to*e).toFixed(dec);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
+// 3D tilt
+document.querySelectorAll('.tilt').forEach(c=>{c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`perspective(800px) rotateX(${-y*6}deg) rotateY(${x*6}deg) translateZ(0)`});c.addEventListener('mouseleave',()=>c.style.transform='')});
+// Graph data
+const N=[{id:'loan',label:'CN-014 Loan',g:0,hot:1},{id:'bA',label:'Block A · bld_0041',g:1},{id:'bB',label:'Block B · bld_0042',g:1,hot:1},{id:'bC',label:'Block C · bld_0043',g:1,hot:1},
+{id:'s1',label:'Arrears 6.8%',g:2,hot:1},{id:'s2',label:'Service charge +£212k',g:2,hot:1},{id:'s3',label:'FRA overdue 47d',g:2,hot:1},{id:'s4',label:'EWS1 pending',g:2},{id:'s5',label:'Lift check OK',g:2},{id:'s6',label:'Repairs 3 open',g:2},{id:'s7',label:'Gym news',g:2},{id:'s8',label:'MSCI comps',g:2},
+{id:'cI',label:'ICR 1.42x < 1.50x',g:3,hot:1},{id:'cL',label:'LTV 68% / 70%',g:3},{id:'cO',label:'Occupancy 91%',g:3}];
+const Lk=[['loan','bA'],['loan','bB',1],['loan','bC',1],['bB','s1',1],['bB','s2',1],['bC','s3',1],['bC','s4'],['bA','s5'],['bA','s6'],['bA','s7'],['loan','s8'],['s1','cI',1],['s2','cI',1],['s3','cI',1],['s8','cL'],['s4','cL'],['s6','cO'],['s7','cO']].map(([s,t,h])=>({source:s,target:t,hot:!!h}));
+let graphMade=false;
+function graph2D(){const el=$('#graph');const W=el.clientWidth,H=el.clientHeight;$('#gmode').textContent='2D';
+ const xs=[.12,.36,.62,.88],byG=[0,1,2,3].map(g=>N.filter(n=>n.g==g));const P={};byG.forEach((arr,g)=>arr.forEach((n,i)=>P[n.id]=[xs[g]*W,(i+1)/(arr.length+1)*H]));
+ let s=`<svg width="${W}" height="${H}"><defs><filter id="gl"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+ Lk.forEach(l=>{const[a,b]=[P[l.source],P[l.target]];const mx=(a[0]+b[0])/2;s+=`<path d="M${a[0]},${a[1]} C${mx},${a[1]} ${mx},${b[1]} ${b[0]},${b[1]}" fill="none" stroke="${l.hot?'#EF4444':'#2A2F37'}" stroke-width="${l.hot?2:1}" ${l.hot?'filter="url(#gl)"':''}/>`});
+ N.forEach(n=>{const[x,y]=P[n.id];s+=`<circle cx="${x}" cy="${y}" r="${n.g==0?10:6}" fill="${n.hot?'#EF4444':'#3A404A'}" ${n.hot?'filter="url(#gl)"':''}/><text x="${x}" y="${y-12}" text-anchor="middle" font-size="12" font-family="Geist" fill="${n.hot?'#E6E8EB':'#8A919C'}">${n.label}</text>`});
+ el.innerHTML=s+'</svg>'}
+function graph3D(){const el=$('#graph');
+ try{const c=document.createElement('canvas');if(!(c.getContext('webgl')||c.getContext('experimental-webgl'))||typeof ForceGraph3D==='undefined')throw 0;
+  const G3=ForceGraph3D()(el).width(el.clientWidth).height(el.clientHeight).backgroundColor('rgba(0,0,0,0)').showNavInfo(false)
+   .graphData((()=>{const cnt=[0,0,0,0],tot=[1,3,8,3];return {nodes:N.map(n=>{const i=cnt[n.g]++;const y=((tot[n.g]-1)/2-i)*(n.g==2?44:90);return {...n,fx:(n.g-1.5)*120-28,fy:y,fz:(n.hot?0:((i%2)?-50:50))}}),links:Lk.map(l=>({...l}))}})()).cooldownTicks(1)
+   .nodeRelSize(4).nodeVal(n=>n.g==0?12:n.hot?6:3).nodeColor(n=>n.hot?'#EF4444':'#4A515C').nodeOpacity(.95).nodeResolution(24)
+   .nodeLabel(n=>n.label).linkColor(l=>l.hot?'#EF4444':'#2E343D').linkWidth(l=>l.hot?2.2:.6).linkOpacity(.85)
+   .linkDirectionalParticles(l=>l.hot?3:0).linkDirectionalParticleWidth(2.2).linkDirectionalParticleColor(()=>'#FFD60A').linkDirectionalParticleSpeed(.006);
+  const R=540,t0=performance.now();
+  setInterval(()=>{const a=.35*Math.sin((performance.now()-t0)/5000);G3.cameraPosition({x:R*Math.sin(a),y:40,z:R*Math.cos(a)},{x:0,y:0,z:0})},30);
+  $('#gmode').textContent='3D';
+  // overlay labels for readability
+  const ov=document.createElement('div');ov.className='absolute inset-0 pointer-events-none';el.appendChild(ov);
+  setInterval(()=>{ov.innerHTML=G3.graphData().nodes.map(n=>{if(n.x==null)return'';const p=G3.graph2ScreenCoords(n.x,n.y,n.z);return (n.hot||n.g==0||n.g==3)?`<div class="absolute text-[12px] whitespace-nowrap -translate-x-1/2" style="left:${p.x}px;top:${p.y-28}px;color:${n.hot?'#E6E8EB':'#8A919C'};font-weight:${n.hot?500:400};text-shadow:0 1px 4px #000">${n.label}</div>`:''}).join('')},60);
+ }catch(e){graph2D()}}
+function go(t){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+t));document.querySelectorAll('#nav .navi').forEach(b=>b.classList.toggle('on',b.dataset.t==t));
+ $('#crumb').textContent={watchlist:'Watchlist',loan:'CN-014 · Riverside BTR',memo:'Memo',log:'Step log'}[t];tick();
+ if(t=='loan'&&!graphMade){graphMade=true;requestAnimationFrame(()=>(new URLSearchParams(location.search).get('g')=='2d'?graph2D:graph3D)())}}
+document.querySelectorAll('#nav .navi').forEach(b=>b.onclick=()=>go(b.dataset.t));
+go(new URLSearchParams(location.search).get('tab')||'watchlist');
+</script>
+</body></html>

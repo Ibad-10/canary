@@ -1,0 +1,2637 @@
+[
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "status": "red",
+  "breach_metric": "icr",
+  "breach_month": "2027-03-01",
+  "metrics": {
+   "icr": {
+    "now": 1.62,
+    "m3": {
+     "lo": 1.475,
+     "mid": 1.52,
+     "hi": 1.565
+    },
+    "m6": {
+     "lo": 1.29,
+     "mid": 1.38,
+     "hi": 1.47
+    },
+    "limit": 1.5,
+    "cash_trap": 1.55,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.886
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.872
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.831
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.802
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.795
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.772
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.73
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.71
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.703
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.671
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.632
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.62
+     }
+    ]
+   },
+   "ltv": {
+    "now": 66,
+    "m3": {
+     "lo": 67.4,
+     "mid": 68,
+     "hi": 68.6
+    },
+    "m6": {
+     "lo": 69.3,
+     "mid": 70.5,
+     "hi": 71.7
+    },
+    "limit": 70,
+    "cash_trap": 68,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 61
+     },
+     {
+      "month": "2026-01-01",
+      "value": 61.1
+     },
+     {
+      "month": "2026-02-01",
+      "value": 62.1
+     },
+     {
+      "month": "2026-03-01",
+      "value": 62.8
+     },
+     {
+      "month": "2026-04-01",
+      "value": 62.6
+     },
+     {
+      "month": "2026-05-01",
+      "value": 63
+     },
+     {
+      "month": "2026-06-01",
+      "value": 64
+     },
+     {
+      "month": "2026-07-01",
+      "value": 64.4
+     },
+     {
+      "month": "2026-08-01",
+      "value": 64.3
+     },
+     {
+      "month": "2026-09-01",
+      "value": 64.9
+     },
+     {
+      "month": "2026-10-01",
+      "value": 65.9
+     },
+     {
+      "month": "2026-11-01",
+      "value": 66
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 93,
+    "m3": {
+     "lo": 91.4,
+     "mid": 92,
+     "hi": 92.6
+    },
+    "m6": {
+     "lo": 89.8,
+     "mid": 91,
+     "hi": 92.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 95.7
+     },
+     {
+      "month": "2026-01-01",
+      "value": 95.3
+     },
+     {
+      "month": "2026-02-01",
+      "value": 94.3
+     },
+     {
+      "month": "2026-03-01",
+      "value": 94.4
+     },
+     {
+      "month": "2026-04-01",
+      "value": 95
+     },
+     {
+      "month": "2026-05-01",
+      "value": 94.2
+     },
+     {
+      "month": "2026-06-01",
+      "value": 93.4
+     },
+     {
+      "month": "2026-07-01",
+      "value": 93.9
+     },
+     {
+      "month": "2026-08-01",
+      "value": 94.2
+     },
+     {
+      "month": "2026-09-01",
+      "value": 93.1
+     },
+     {
+      "month": "2026-10-01",
+      "value": 92.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 93
+     }
+    ]
+   }
+  },
+  "drivers": [
+   {
+    "kind": "arrears",
+    "label": "Arrears climbing",
+    "effect_text": "Less rent collected each month; takes about 0.09x off interest cover.",
+    "delta": {
+     "metric": "icr",
+     "amount": -0.09
+    },
+    "signal_ids": [
+     1
+    ],
+    "evidence_ids": [
+     2
+    ]
+   },
+   {
+    "kind": "sc_overspend",
+    "label": "Service costs over budget",
+    "effect_text": "Overspend the landlord cannot recover from leaseholders; about -0.07x.",
+    "delta": {
+     "metric": "icr",
+     "amount": -0.07
+    },
+    "signal_ids": [
+     2
+    ],
+    "evidence_ids": []
+   },
+   {
+    "kind": "emergency_tickets",
+    "label": "More emergency repairs",
+    "effect_text": "Repair cost is rising; about -0.03x.",
+    "delta": {
+     "metric": "icr",
+     "amount": -0.03
+    },
+    "signal_ids": [
+     5
+    ],
+    "evidence_ids": []
+   },
+   {
+    "kind": "compliance_overdue",
+    "label": "Fire check overdue, EWS1 pending",
+    "effect_text": "Value haircut while remediation is open; adds about 2.5pp to loan-to-value.",
+    "delta": {
+     "metric": "ltv",
+     "amount": 2.5
+    },
+    "signal_ids": [
+     3,
+     4
+    ],
+    "evidence_ids": [
+     1
+    ]
+   },
+   {
+    "kind": "news",
+    "label": "Gym operator in the news",
+    "effect_text": "Small tenant, about -1pp occupancy. Covenant: see clause 21.2.",
+    "delta": {
+     "metric": "occupancy",
+     "amount": -1
+    },
+    "signal_ids": [],
+    "evidence_ids": [
+     3,
+     4
+    ]
+   }
+  ]
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "status": "red",
+  "breach_metric": "ltv",
+  "breach_month": "2027-02-01",
+  "metrics": {
+   "icr": {
+    "now": 1.62,
+    "m3": {
+     "lo": 1.58,
+     "mid": 1.6,
+     "hi": 1.62
+    },
+    "m6": {
+     "lo": 1.54,
+     "mid": 1.58,
+     "hi": 1.62
+    },
+    "limit": 1.35,
+    "cash_trap": 1.45,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.675
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.663
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.644
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.652
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.66
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.641
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.629
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.642
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.642
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.62
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.616
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.62
+     }
+    ]
+   },
+   "ltv": {
+    "now": 66.5,
+    "m3": {
+     "lo": 69.9,
+     "mid": 70.5,
+     "hi": 71.1
+    },
+    "m6": {
+     "lo": 73.3,
+     "mid": 74.5,
+     "hi": 75.7
+    },
+    "limit": 70,
+    "cash_trap": 68,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 57.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 58.3
+     },
+     {
+      "month": "2026-02-01",
+      "value": 59.7
+     },
+     {
+      "month": "2026-03-01",
+      "value": 60.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 60.5
+     },
+     {
+      "month": "2026-05-01",
+      "value": 61.7
+     },
+     {
+      "month": "2026-06-01",
+      "value": 62.9
+     },
+     {
+      "month": "2026-07-01",
+      "value": 63.2
+     },
+     {
+      "month": "2026-08-01",
+      "value": 63.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 65.1
+     },
+     {
+      "month": "2026-10-01",
+      "value": 66
+     },
+     {
+      "month": "2026-11-01",
+      "value": 66.5
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 78,
+    "m3": {
+     "lo": 76.4,
+     "mid": 77,
+     "hi": 77.6
+    },
+    "m6": {
+     "lo": 74.8,
+     "mid": 76,
+     "hi": 77.2
+    },
+    "limit": 70,
+    "cash_trap": 75,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 80.8
+     },
+     {
+      "month": "2026-01-01",
+      "value": 79.8
+     },
+     {
+      "month": "2026-02-01",
+      "value": 79.3
+     },
+     {
+      "month": "2026-03-01",
+      "value": 80
+     },
+     {
+      "month": "2026-04-01",
+      "value": 79.8
+     },
+     {
+      "month": "2026-05-01",
+      "value": 78.7
+     },
+     {
+      "month": "2026-06-01",
+      "value": 78.7
+     },
+     {
+      "month": "2026-07-01",
+      "value": 79.4
+     },
+     {
+      "month": "2026-08-01",
+      "value": 78.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 77.8
+     },
+     {
+      "month": "2026-10-01",
+      "value": 78.2
+     },
+     {
+      "month": "2026-11-01",
+      "value": 78
+     }
+    ]
+   }
+  },
+  "drivers": [
+   {
+    "kind": "msci",
+    "label": "Office values drifting down",
+    "effect_text": "Leeds office values fell 4.1% in 12 months; pushes loan-to-value past its limit in about 3 months.",
+    "delta": {
+     "metric": "ltv",
+     "amount": 4
+    },
+    "signal_ids": [],
+    "evidence_ids": [
+     5,
+     6
+    ]
+   },
+   {
+    "kind": "vacancy",
+    "label": "22% of space empty",
+    "effect_text": "Lower rent roll and weaker valuation; about -2pp occupancy.",
+    "delta": {
+     "metric": "occupancy",
+     "amount": -2
+    },
+    "signal_ids": [
+     7
+    ],
+    "evidence_ids": []
+   },
+   {
+    "kind": "compliance_missing",
+    "label": "EICR missing",
+    "effect_text": "Valuers may apply a haircut until the certificate is in.",
+    "delta": {
+     "metric": "ltv",
+     "amount": 0.5
+    },
+    "signal_ids": [
+     8,
+     9
+    ],
+    "evidence_ids": []
+   }
+  ]
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-022",
+  "status": "amber",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.71,
+    "m3": {
+     "lo": 1.575,
+     "mid": 1.62,
+     "hi": 1.665
+    },
+    "m6": {
+     "lo": 1.43,
+     "mid": 1.52,
+     "hi": 1.61
+    },
+    "limit": 1.4,
+    "cash_trap": 1.55,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.929
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.892
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.873
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.872
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.848
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.813
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.802
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.798
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.767
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.736
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.733
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.71
+     }
+    ]
+   },
+   "ltv": {
+    "now": 58,
+    "m3": {
+     "lo": 58.4,
+     "mid": 59,
+     "hi": 59.6
+    },
+    "m6": {
+     "lo": 58.8,
+     "mid": 60,
+     "hi": 61.2
+    },
+    "limit": 65,
+    "cash_trap": 62,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 55.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 56.2
+     },
+     {
+      "month": "2026-02-01",
+      "value": 56.5
+     },
+     {
+      "month": "2026-03-01",
+      "value": 56.1
+     },
+     {
+      "month": "2026-04-01",
+      "value": 56.4
+     },
+     {
+      "month": "2026-05-01",
+      "value": 57.2
+     },
+     {
+      "month": "2026-06-01",
+      "value": 57.1
+     },
+     {
+      "month": "2026-07-01",
+      "value": 56.8
+     },
+     {
+      "month": "2026-08-01",
+      "value": 57.4
+     },
+     {
+      "month": "2026-09-01",
+      "value": 58
+     },
+     {
+      "month": "2026-10-01",
+      "value": 57.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 58
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 88,
+    "m3": {
+     "lo": 86.4,
+     "mid": 87,
+     "hi": 87.6
+    },
+    "m6": {
+     "lo": 84.8,
+     "mid": 86,
+     "hi": 87.2
+    },
+    "limit": 80,
+    "cash_trap": 85,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 90.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 89.4
+     },
+     {
+      "month": "2026-02-01",
+      "value": 89.8
+     },
+     {
+      "month": "2026-03-01",
+      "value": 90.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 89.3
+     },
+     {
+      "month": "2026-05-01",
+      "value": 88.6
+     },
+     {
+      "month": "2026-06-01",
+      "value": 89.3
+     },
+     {
+      "month": "2026-07-01",
+      "value": 89.3
+     },
+     {
+      "month": "2026-08-01",
+      "value": 88.2
+     },
+     {
+      "month": "2026-09-01",
+      "value": 88
+     },
+     {
+      "month": "2026-10-01",
+      "value": 88.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 88
+     }
+    ]
+   }
+  },
+  "drivers": [
+   {
+    "kind": "emergency_tickets",
+    "label": "Repair costs rising",
+    "effect_text": "Heading for the cash-trap level of 1.55x.",
+    "delta": {
+     "metric": "icr",
+     "amount": -0.1
+    },
+    "signal_ids": [
+     11
+    ],
+    "evidence_ids": [
+     7
+    ]
+   },
+   {
+    "kind": "compliance_overdue",
+    "label": "Lift checks overdue",
+    "effect_text": "Compliance cost and insurance risk.",
+    "delta": {
+     "metric": "icr",
+     "amount": -0.04
+    },
+    "signal_ids": [
+     10
+    ],
+    "evidence_ids": []
+   }
+  ]
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-007",
+  "status": "amber",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.74,
+    "m3": {
+     "lo": 1.655,
+     "mid": 1.7,
+     "hi": 1.745
+    },
+    "m6": {
+     "lo": 1.57,
+     "mid": 1.66,
+     "hi": 1.75
+    },
+    "limit": 1.25,
+    "cash_trap": 1.4,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.828
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.808
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.815
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.815
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.79
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.778
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.788
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.779
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.754
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.751
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.76
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.74
+     }
+    ]
+   },
+   "ltv": {
+    "now": 55,
+    "m3": {
+     "lo": 61.4,
+     "mid": 62,
+     "hi": 62.6
+    },
+    "m6": {
+     "lo": 66.8,
+     "mid": 68,
+     "hi": 69.2
+    },
+    "limit": 75,
+    "cash_trap": 65,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 40.6
+     },
+     {
+      "month": "2026-01-01",
+      "value": 42.4
+     },
+     {
+      "month": "2026-02-01",
+      "value": 43.3
+     },
+     {
+      "month": "2026-03-01",
+      "value": 44.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 46
+     },
+     {
+      "month": "2026-05-01",
+      "value": 47.5
+     },
+     {
+      "month": "2026-06-01",
+      "value": 48.3
+     },
+     {
+      "month": "2026-07-01",
+      "value": 49.5
+     },
+     {
+      "month": "2026-08-01",
+      "value": 51.4
+     },
+     {
+      "month": "2026-09-01",
+      "value": 52.6
+     },
+     {
+      "month": "2026-10-01",
+      "value": 53.3
+     },
+     {
+      "month": "2026-11-01",
+      "value": 55
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 94,
+    "m3": {
+     "lo": 92.4,
+     "mid": 93,
+     "hi": 93.6
+    },
+    "m6": {
+     "lo": 91.8,
+     "mid": 93,
+     "hi": 94.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 94.7
+     },
+     {
+      "month": "2026-01-01",
+      "value": 94.6
+     },
+     {
+      "month": "2026-02-01",
+      "value": 95.4
+     },
+     {
+      "month": "2026-03-01",
+      "value": 95.1
+     },
+     {
+      "month": "2026-04-01",
+      "value": 94.1
+     },
+     {
+      "month": "2026-05-01",
+      "value": 94.5
+     },
+     {
+      "month": "2026-06-01",
+      "value": 95.1
+     },
+     {
+      "month": "2026-07-01",
+      "value": 94.4
+     },
+     {
+      "month": "2026-08-01",
+      "value": 93.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 94.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 94.6
+     },
+     {
+      "month": "2026-11-01",
+      "value": 94
+     }
+    ]
+   }
+  },
+  "drivers": [
+   {
+    "kind": "hpi",
+    "label": "Local prices easing",
+    "effect_text": "Loan-to-value rises above the 65% cash-trap level in about 5 months.",
+    "delta": {
+     "metric": "ltv",
+     "amount": 6
+    },
+    "signal_ids": [
+     12
+    ],
+    "evidence_ids": [
+     8
+    ]
+   }
+  ]
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-019",
+  "status": "amber",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.78,
+    "m3": {
+     "lo": 1.695,
+     "mid": 1.74,
+     "hi": 1.785
+    },
+    "m6": {
+     "lo": 1.61,
+     "mid": 1.7,
+     "hi": 1.79
+    },
+    "limit": 1.3,
+    "cash_trap": 1.4,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.858
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.855
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.863
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.846
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.824
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.829
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.832
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.808
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.793
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.803
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.797
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.78
+     }
+    ]
+   },
+   "ltv": {
+    "now": 57,
+    "m3": {
+     "lo": 57.4,
+     "mid": 58,
+     "hi": 58.6
+    },
+    "m6": {
+     "lo": 57.8,
+     "mid": 59,
+     "hi": 60.2
+    },
+    "limit": 65,
+    "cash_trap": 62,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 55.1
+     },
+     {
+      "month": "2026-01-01",
+      "value": 55.2
+     },
+     {
+      "month": "2026-02-01",
+      "value": 54.8
+     },
+     {
+      "month": "2026-03-01",
+      "value": 55.3
+     },
+     {
+      "month": "2026-04-01",
+      "value": 56
+     },
+     {
+      "month": "2026-05-01",
+      "value": 55.8
+     },
+     {
+      "month": "2026-06-01",
+      "value": 55.6
+     },
+     {
+      "month": "2026-07-01",
+      "value": 56.3
+     },
+     {
+      "month": "2026-08-01",
+      "value": 56.8
+     },
+     {
+      "month": "2026-09-01",
+      "value": 56.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 56.5
+     },
+     {
+      "month": "2026-11-01",
+      "value": 57
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 88,
+    "m3": {
+     "lo": 84.4,
+     "mid": 85,
+     "hi": 85.6
+    },
+    "m6": {
+     "lo": 80.8,
+     "mid": 82,
+     "hi": 83.2
+    },
+    "limit": 80,
+    "cash_trap": 85,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 94
+     },
+     {
+      "month": "2026-01-01",
+      "value": 94.2
+     },
+     {
+      "month": "2026-02-01",
+      "value": 93.9
+     },
+     {
+      "month": "2026-03-01",
+      "value": 92.5
+     },
+     {
+      "month": "2026-04-01",
+      "value": 91.7
+     },
+     {
+      "month": "2026-05-01",
+      "value": 92
+     },
+     {
+      "month": "2026-06-01",
+      "value": 91.4
+     },
+     {
+      "month": "2026-07-01",
+      "value": 89.9
+     },
+     {
+      "month": "2026-08-01",
+      "value": 89.6
+     },
+     {
+      "month": "2026-09-01",
+      "value": 89.8
+     },
+     {
+      "month": "2026-10-01",
+      "value": 88.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 88
+     }
+    ]
+   }
+  },
+  "drivers": [
+   {
+    "kind": "vacancy",
+    "label": "Occupancy sliding",
+    "effect_text": "Occupancy reaches the 85% cash-trap level next quarter.",
+    "delta": {
+     "metric": "occupancy",
+     "amount": -3
+    },
+    "signal_ids": [
+     13
+    ],
+    "evidence_ids": [
+     9
+    ]
+   }
+  ]
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-003",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.98,
+    "m3": {
+     "lo": 1.96,
+     "mid": 1.98,
+     "hi": 2
+    },
+    "m6": {
+     "lo": 1.93,
+     "mid": 1.97,
+     "hi": 2.01
+    },
+    "limit": 1.5,
+    "cash_trap": 1.6,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.98
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.996
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.998
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.979
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.98
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.997
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.989
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.972
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.982
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.994
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.979
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.98
+     }
+    ]
+   },
+   "ltv": {
+    "now": 52,
+    "m3": {
+     "lo": 51.4,
+     "mid": 52,
+     "hi": 52.6
+    },
+    "m6": {
+     "lo": 50.8,
+     "mid": 52,
+     "hi": 53.2
+    },
+    "limit": 65,
+    "cash_trap": 60,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 52.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 51.8
+     },
+     {
+      "month": "2026-02-01",
+      "value": 51.7
+     },
+     {
+      "month": "2026-03-01",
+      "value": 52.3
+     },
+     {
+      "month": "2026-04-01",
+      "value": 52.3
+     },
+     {
+      "month": "2026-05-01",
+      "value": 51.7
+     },
+     {
+      "month": "2026-06-01",
+      "value": 51.8
+     },
+     {
+      "month": "2026-07-01",
+      "value": 52.4
+     },
+     {
+      "month": "2026-08-01",
+      "value": 52.1
+     },
+     {
+      "month": "2026-09-01",
+      "value": 51.6
+     },
+     {
+      "month": "2026-10-01",
+      "value": 52
+     },
+     {
+      "month": "2026-11-01",
+      "value": 52
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 97,
+    "m3": {
+     "lo": 96.4,
+     "mid": 97,
+     "hi": 97.6
+    },
+    "m6": {
+     "lo": 95.8,
+     "mid": 97,
+     "hi": 98.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 96.8
+     },
+     {
+      "month": "2026-01-01",
+      "value": 97.6
+     },
+     {
+      "month": "2026-02-01",
+      "value": 97.1
+     },
+     {
+      "month": "2026-03-01",
+      "value": 96.4
+     },
+     {
+      "month": "2026-04-01",
+      "value": 97.1
+     },
+     {
+      "month": "2026-05-01",
+      "value": 97.6
+     },
+     {
+      "month": "2026-06-01",
+      "value": 96.8
+     },
+     {
+      "month": "2026-07-01",
+      "value": 96.5
+     },
+     {
+      "month": "2026-08-01",
+      "value": 97.3
+     },
+     {
+      "month": "2026-09-01",
+      "value": 97.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 96.5
+     },
+     {
+      "month": "2026-11-01",
+      "value": 97
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-011",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 2.12,
+    "m3": {
+     "lo": 2.08,
+     "mid": 2.1,
+     "hi": 2.12
+    },
+    "m6": {
+     "lo": 2.06,
+     "mid": 2.1,
+     "hi": 2.14
+    },
+    "limit": 1.4,
+    "cash_trap": 1.55,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 2.14
+     },
+     {
+      "month": "2026-01-01",
+      "value": 2.152
+     },
+     {
+      "month": "2026-02-01",
+      "value": 2.137
+     },
+     {
+      "month": "2026-03-01",
+      "value": 2.124
+     },
+     {
+      "month": "2026-04-01",
+      "value": 2.138
+     },
+     {
+      "month": "2026-05-01",
+      "value": 2.142
+     },
+     {
+      "month": "2026-06-01",
+      "value": 2.123
+     },
+     {
+      "month": "2026-07-01",
+      "value": 2.119
+     },
+     {
+      "month": "2026-08-01",
+      "value": 2.135
+     },
+     {
+      "month": "2026-09-01",
+      "value": 2.13
+     },
+     {
+      "month": "2026-10-01",
+      "value": 2.111
+     },
+     {
+      "month": "2026-11-01",
+      "value": 2.12
+     }
+    ]
+   },
+   "ltv": {
+    "now": 49,
+    "m3": {
+     "lo": 48.4,
+     "mid": 49,
+     "hi": 49.6
+    },
+    "m6": {
+     "lo": 47.8,
+     "mid": 49,
+     "hi": 50.2
+    },
+    "limit": 65,
+    "cash_trap": 62,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 49.1
+     },
+     {
+      "month": "2026-01-01",
+      "value": 48.6
+     },
+     {
+      "month": "2026-02-01",
+      "value": 49
+     },
+     {
+      "month": "2026-03-01",
+      "value": 49.4
+     },
+     {
+      "month": "2026-04-01",
+      "value": 48.9
+     },
+     {
+      "month": "2026-05-01",
+      "value": 48.6
+     },
+     {
+      "month": "2026-06-01",
+      "value": 49.2
+     },
+     {
+      "month": "2026-07-01",
+      "value": 49.3
+     },
+     {
+      "month": "2026-08-01",
+      "value": 48.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 48.7
+     },
+     {
+      "month": "2026-10-01",
+      "value": 49.3
+     },
+     {
+      "month": "2026-11-01",
+      "value": 49
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 99,
+    "m3": {
+     "lo": 97.4,
+     "mid": 98,
+     "hi": 98.6
+    },
+    "m6": {
+     "lo": 96.8,
+     "mid": 98,
+     "hi": 99.2
+    },
+    "limit": 80,
+    "cash_trap": 85,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 100.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 100.5
+     },
+     {
+      "month": "2026-02-01",
+      "value": 99.5
+     },
+     {
+      "month": "2026-03-01",
+      "value": 99.5
+     },
+     {
+      "month": "2026-04-01",
+      "value": 100.2
+     },
+     {
+      "month": "2026-05-01",
+      "value": 99.8
+     },
+     {
+      "month": "2026-06-01",
+      "value": 98.9
+     },
+     {
+      "month": "2026-07-01",
+      "value": 99.4
+     },
+     {
+      "month": "2026-08-01",
+      "value": 99.9
+     },
+     {
+      "month": "2026-09-01",
+      "value": 99.1
+     },
+     {
+      "month": "2026-10-01",
+      "value": 98.5
+     },
+     {
+      "month": "2026-11-01",
+      "value": 99
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-025",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.89,
+    "m3": {
+     "lo": 1.86,
+     "mid": 1.88,
+     "hi": 1.9
+    },
+    "m6": {
+     "lo": 1.83,
+     "mid": 1.87,
+     "hi": 1.91
+    },
+    "limit": 1.5,
+    "cash_trap": 1.6,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.921
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.917
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.897
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.902
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.916
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.903
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.888
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.9
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.907
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.889
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.882
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.89
+     }
+    ]
+   },
+   "ltv": {
+    "now": 54,
+    "m3": {
+     "lo": 53.4,
+     "mid": 54,
+     "hi": 54.6
+    },
+    "m6": {
+     "lo": 52.8,
+     "mid": 54,
+     "hi": 55.2
+    },
+    "limit": 65,
+    "cash_trap": 60,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 53.7
+     },
+     {
+      "month": "2026-01-01",
+      "value": 53.7
+     },
+     {
+      "month": "2026-02-01",
+      "value": 54.3
+     },
+     {
+      "month": "2026-03-01",
+      "value": 54.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 53.6
+     },
+     {
+      "month": "2026-05-01",
+      "value": 53.9
+     },
+     {
+      "month": "2026-06-01",
+      "value": 54.4
+     },
+     {
+      "month": "2026-07-01",
+      "value": 54
+     },
+     {
+      "month": "2026-08-01",
+      "value": 53.6
+     },
+     {
+      "month": "2026-09-01",
+      "value": 54.1
+     },
+     {
+      "month": "2026-10-01",
+      "value": 54.4
+     },
+     {
+      "month": "2026-11-01",
+      "value": 54
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 95,
+    "m3": {
+     "lo": 94.4,
+     "mid": 95,
+     "hi": 95.6
+    },
+    "m6": {
+     "lo": 93.8,
+     "mid": 95,
+     "hi": 96.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 95.6
+     },
+     {
+      "month": "2026-01-01",
+      "value": 94.9
+     },
+     {
+      "month": "2026-02-01",
+      "value": 94.4
+     },
+     {
+      "month": "2026-03-01",
+      "value": 95.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 95.5
+     },
+     {
+      "month": "2026-05-01",
+      "value": 94.6
+     },
+     {
+      "month": "2026-06-01",
+      "value": 94.6
+     },
+     {
+      "month": "2026-07-01",
+      "value": 95.5
+     },
+     {
+      "month": "2026-08-01",
+      "value": 95.3
+     },
+     {
+      "month": "2026-09-01",
+      "value": 94.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 94.8
+     },
+     {
+      "month": "2026-11-01",
+      "value": 95
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-028",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 2.2,
+    "m3": {
+     "lo": 2.18,
+     "mid": 2.2,
+     "hi": 2.22
+    },
+    "m6": {
+     "lo": 2.15,
+     "mid": 2.19,
+     "hi": 2.23
+    },
+    "limit": 1.25,
+    "cash_trap": 1.4,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 2.222
+     },
+     {
+      "month": "2026-01-01",
+      "value": 2.205
+     },
+     {
+      "month": "2026-02-01",
+      "value": 2.199
+     },
+     {
+      "month": "2026-03-01",
+      "value": 2.216
+     },
+     {
+      "month": "2026-04-01",
+      "value": 2.215
+     },
+     {
+      "month": "2026-05-01",
+      "value": 2.196
+     },
+     {
+      "month": "2026-06-01",
+      "value": 2.199
+     },
+     {
+      "month": "2026-07-01",
+      "value": 2.215
+     },
+     {
+      "month": "2026-08-01",
+      "value": 2.206
+     },
+     {
+      "month": "2026-09-01",
+      "value": 2.19
+     },
+     {
+      "month": "2026-10-01",
+      "value": 2.201
+     },
+     {
+      "month": "2026-11-01",
+      "value": 2.2
+     }
+    ]
+   },
+   "ltv": {
+    "now": 47,
+    "m3": {
+     "lo": 46.4,
+     "mid": 47,
+     "hi": 47.6
+    },
+    "m6": {
+     "lo": 45.8,
+     "mid": 47,
+     "hi": 48.2
+    },
+    "limit": 75,
+    "cash_trap": 65,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 46.6
+     },
+     {
+      "month": "2026-01-01",
+      "value": 47.1
+     },
+     {
+      "month": "2026-02-01",
+      "value": 47.4
+     },
+     {
+      "month": "2026-03-01",
+      "value": 46.8
+     },
+     {
+      "month": "2026-04-01",
+      "value": 46.7
+     },
+     {
+      "month": "2026-05-01",
+      "value": 47.3
+     },
+     {
+      "month": "2026-06-01",
+      "value": 47.2
+     },
+     {
+      "month": "2026-07-01",
+      "value": 46.7
+     },
+     {
+      "month": "2026-08-01",
+      "value": 46.9
+     },
+     {
+      "month": "2026-09-01",
+      "value": 47.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 47
+     },
+     {
+      "month": "2026-11-01",
+      "value": 47
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 96,
+    "m3": {
+     "lo": 95.4,
+     "mid": 96,
+     "hi": 96.6
+    },
+    "m6": {
+     "lo": 94.8,
+     "mid": 96,
+     "hi": 97.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 96.3
+     },
+     {
+      "month": "2026-01-01",
+      "value": 95.5
+     },
+     {
+      "month": "2026-02-01",
+      "value": 95.8
+     },
+     {
+      "month": "2026-03-01",
+      "value": 96.6
+     },
+     {
+      "month": "2026-04-01",
+      "value": 96
+     },
+     {
+      "month": "2026-05-01",
+      "value": 95.4
+     },
+     {
+      "month": "2026-06-01",
+      "value": 96.1
+     },
+     {
+      "month": "2026-07-01",
+      "value": 96.6
+     },
+     {
+      "month": "2026-08-01",
+      "value": 95.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 95.5
+     },
+     {
+      "month": "2026-10-01",
+      "value": 96.4
+     },
+     {
+      "month": "2026-11-01",
+      "value": 96
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-033",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 2.05,
+    "m3": {
+     "lo": 2.02,
+     "mid": 2.04,
+     "hi": 2.06
+    },
+    "m6": {
+     "lo": 1.99,
+     "mid": 2.03,
+     "hi": 2.07
+    },
+    "limit": 1.35,
+    "cash_trap": 1.45,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 2.075
+     },
+     {
+      "month": "2026-01-01",
+      "value": 2.058
+     },
+     {
+      "month": "2026-02-01",
+      "value": 2.068
+     },
+     {
+      "month": "2026-03-01",
+      "value": 2.078
+     },
+     {
+      "month": "2026-04-01",
+      "value": 2.061
+     },
+     {
+      "month": "2026-05-01",
+      "value": 2.051
+     },
+     {
+      "month": "2026-06-01",
+      "value": 2.066
+     },
+     {
+      "month": "2026-07-01",
+      "value": 2.068
+     },
+     {
+      "month": "2026-08-01",
+      "value": 2.048
+     },
+     {
+      "month": "2026-09-01",
+      "value": 2.046
+     },
+     {
+      "month": "2026-10-01",
+      "value": 2.062
+     },
+     {
+      "month": "2026-11-01",
+      "value": 2.05
+     }
+    ]
+   },
+   "ltv": {
+    "now": 50,
+    "m3": {
+     "lo": 49.4,
+     "mid": 50,
+     "hi": 50.6
+    },
+    "m6": {
+     "lo": 48.8,
+     "mid": 50,
+     "hi": 51.2
+    },
+    "limit": 65,
+    "cash_trap": 60,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 49.8
+     },
+     {
+      "month": "2026-01-01",
+      "value": 50.4
+     },
+     {
+      "month": "2026-02-01",
+      "value": 50.1
+     },
+     {
+      "month": "2026-03-01",
+      "value": 49.6
+     },
+     {
+      "month": "2026-04-01",
+      "value": 50
+     },
+     {
+      "month": "2026-05-01",
+      "value": 50.4
+     },
+     {
+      "month": "2026-06-01",
+      "value": 49.9
+     },
+     {
+      "month": "2026-07-01",
+      "value": 49.6
+     },
+     {
+      "month": "2026-08-01",
+      "value": 50.2
+     },
+     {
+      "month": "2026-09-01",
+      "value": 50.3
+     },
+     {
+      "month": "2026-10-01",
+      "value": 49.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 50
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 92,
+    "m3": {
+     "lo": 91.4,
+     "mid": 92,
+     "hi": 92.6
+    },
+    "m6": {
+     "lo": 89.8,
+     "mid": 91,
+     "hi": 92.2
+    },
+    "limit": 80,
+    "cash_trap": 85,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 92.8
+     },
+     {
+      "month": "2026-01-01",
+      "value": 92.5
+     },
+     {
+      "month": "2026-02-01",
+      "value": 93.3
+     },
+     {
+      "month": "2026-03-01",
+      "value": 93.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 92.2
+     },
+     {
+      "month": "2026-05-01",
+      "value": 92.3
+     },
+     {
+      "month": "2026-06-01",
+      "value": 93.1
+     },
+     {
+      "month": "2026-07-01",
+      "value": 92.5
+     },
+     {
+      "month": "2026-08-01",
+      "value": 91.7
+     },
+     {
+      "month": "2026-09-01",
+      "value": 92.2
+     },
+     {
+      "month": "2026-10-01",
+      "value": 92.7
+     },
+     {
+      "month": "2026-11-01",
+      "value": 92
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-036",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.94,
+    "m3": {
+     "lo": 1.91,
+     "mid": 1.93,
+     "hi": 1.95
+    },
+    "m6": {
+     "lo": 1.89,
+     "mid": 1.93,
+     "hi": 1.97
+    },
+    "limit": 1.5,
+    "cash_trap": 1.6,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.943
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.942
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.959
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.953
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.936
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.944
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.957
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.943
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.931
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.946
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.952
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.94
+     }
+    ]
+   },
+   "ltv": {
+    "now": 51,
+    "m3": {
+     "lo": 50.4,
+     "mid": 51,
+     "hi": 51.6
+    },
+    "m6": {
+     "lo": 49.8,
+     "mid": 51,
+     "hi": 52.2
+    },
+    "limit": 65,
+    "cash_trap": 60,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 51.2
+     },
+     {
+      "month": "2026-01-01",
+      "value": 51.3
+     },
+     {
+      "month": "2026-02-01",
+      "value": 50.7
+     },
+     {
+      "month": "2026-03-01",
+      "value": 50.8
+     },
+     {
+      "month": "2026-04-01",
+      "value": 51.4
+     },
+     {
+      "month": "2026-05-01",
+      "value": 51.1
+     },
+     {
+      "month": "2026-06-01",
+      "value": 50.6
+     },
+     {
+      "month": "2026-07-01",
+      "value": 51
+     },
+     {
+      "month": "2026-08-01",
+      "value": 51.4
+     },
+     {
+      "month": "2026-09-01",
+      "value": 50.9
+     },
+     {
+      "month": "2026-10-01",
+      "value": 50.6
+     },
+     {
+      "month": "2026-11-01",
+      "value": 51
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 96,
+    "m3": {
+     "lo": 95.4,
+     "mid": 96,
+     "hi": 96.6
+    },
+    "m6": {
+     "lo": 94.8,
+     "mid": 96,
+     "hi": 97.2
+    },
+    "limit": 85,
+    "cash_trap": 90,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 95.4
+     },
+     {
+      "month": "2026-01-01",
+      "value": 96
+     },
+     {
+      "month": "2026-02-01",
+      "value": 96.6
+     },
+     {
+      "month": "2026-03-01",
+      "value": 95.8
+     },
+     {
+      "month": "2026-04-01",
+      "value": 95.4
+     },
+     {
+      "month": "2026-05-01",
+      "value": 96.3
+     },
+     {
+      "month": "2026-06-01",
+      "value": 96.5
+     },
+     {
+      "month": "2026-07-01",
+      "value": 95.6
+     },
+     {
+      "month": "2026-08-01",
+      "value": 95.6
+     },
+     {
+      "month": "2026-09-01",
+      "value": 96.5
+     },
+     {
+      "month": "2026-10-01",
+      "value": 96.2
+     },
+     {
+      "month": "2026-11-01",
+      "value": 96
+     }
+    ]
+   }
+  },
+  "drivers": []
+ },
+ {
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-040",
+  "status": "green",
+  "breach_metric": null,
+  "breach_month": null,
+  "metrics": {
+   "icr": {
+    "now": 1.87,
+    "m3": {
+     "lo": 1.84,
+     "mid": 1.86,
+     "hi": 1.88
+    },
+    "m6": {
+     "lo": 1.81,
+     "mid": 1.85,
+     "hi": 1.89
+    },
+    "limit": 1.4,
+    "cash_trap": 1.55,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 1.88
+     },
+     {
+      "month": "2026-01-01",
+      "value": 1.893
+     },
+     {
+      "month": "2026-02-01",
+      "value": 1.899
+     },
+     {
+      "month": "2026-03-01",
+      "value": 1.88
+     },
+     {
+      "month": "2026-04-01",
+      "value": 1.875
+     },
+     {
+      "month": "2026-05-01",
+      "value": 1.891
+     },
+     {
+      "month": "2026-06-01",
+      "value": 1.887
+     },
+     {
+      "month": "2026-07-01",
+      "value": 1.868
+     },
+     {
+      "month": "2026-08-01",
+      "value": 1.872
+     },
+     {
+      "month": "2026-09-01",
+      "value": 1.886
+     },
+     {
+      "month": "2026-10-01",
+      "value": 1.873
+     },
+     {
+      "month": "2026-11-01",
+      "value": 1.87
+     }
+    ]
+   },
+   "ltv": {
+    "now": 53,
+    "m3": {
+     "lo": 52.4,
+     "mid": 53,
+     "hi": 53.6
+    },
+    "m6": {
+     "lo": 52.8,
+     "mid": 54,
+     "hi": 55.2
+    },
+    "limit": 65,
+    "cash_trap": 62,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 52.3
+     },
+     {
+      "month": "2026-01-01",
+      "value": 51.9
+     },
+     {
+      "month": "2026-02-01",
+      "value": 51.7
+     },
+     {
+      "month": "2026-03-01",
+      "value": 52.4
+     },
+     {
+      "month": "2026-04-01",
+      "value": 52.6
+     },
+     {
+      "month": "2026-05-01",
+      "value": 52.2
+     },
+     {
+      "month": "2026-06-01",
+      "value": 52.2
+     },
+     {
+      "month": "2026-07-01",
+      "value": 52.9
+     },
+     {
+      "month": "2026-08-01",
+      "value": 52.9
+     },
+     {
+      "month": "2026-09-01",
+      "value": 52.4
+     },
+     {
+      "month": "2026-10-01",
+      "value": 52.8
+     },
+     {
+      "month": "2026-11-01",
+      "value": 53
+     }
+    ]
+   },
+   "occupancy": {
+    "now": 93,
+    "m3": {
+     "lo": 92.4,
+     "mid": 93,
+     "hi": 93.6
+    },
+    "m6": {
+     "lo": 90.8,
+     "mid": 92,
+     "hi": 93.2
+    },
+    "limit": 80,
+    "cash_trap": 85,
+    "series": [
+     {
+      "month": "2025-12-01",
+      "value": 93.7
+     },
+     {
+      "month": "2026-01-01",
+      "value": 94.5
+     },
+     {
+      "month": "2026-02-01",
+      "value": 94.2
+     },
+     {
+      "month": "2026-03-01",
+      "value": 93.2
+     },
+     {
+      "month": "2026-04-01",
+      "value": 93.6
+     },
+     {
+      "month": "2026-05-01",
+      "value": 94.2
+     },
+     {
+      "month": "2026-06-01",
+      "value": 93.5
+     },
+     {
+      "month": "2026-07-01",
+      "value": 92.8
+     },
+     {
+      "month": "2026-08-01",
+      "value": 93.5
+     },
+     {
+      "month": "2026-09-01",
+      "value": 93.7
+     },
+     {
+      "month": "2026-10-01",
+      "value": 92.8
+     },
+     {
+      "month": "2026-11-01",
+      "value": 93
+     }
+    ]
+   }
+  },
+  "drivers": []
+ }
+]

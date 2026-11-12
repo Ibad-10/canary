@@ -1,0 +1,283 @@
+[
+ {
+  "id": 1,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "kind": "value_comp",
+  "title": "Estimated value from 6 comparable BTR sales",
+  "value": 20950000,
+  "unit": "GBP",
+  "effect": {
+   "metric": "ltv",
+   "amount": 2.5
+  },
+  "label": "Sample market trend (illustrative)",
+  "source": {
+   "label": "Sample market trend (illustrative)",
+   "note": "Derived range GBP 20.1m - 21.8m. Licensed data, raw rows not shown."
+  }
+ },
+ {
+  "id": 2,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "kind": "rent_comp",
+  "title": "Median 2-bed rent nearby",
+  "value": 1450,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_88123",
+    "lst_88140",
+    "lst_88171",
+    "lst_88202"
+   ]
+  }
+ },
+ {
+  "id": 3,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "kind": "news",
+  "title": "Ground-floor gym operator announces 9 site closures",
+  "value": null,
+  "unit": null,
+  "effect": {
+   "metric": "occupancy",
+   "amount": -1
+  },
+  "label": "News",
+  "source": {
+   "url": "https://example.com/news/gym-operator-closures",
+   "retrieved": "2026-11-08",
+   "note": "Parallel search; classified operator_distress (moderate)"
+  }
+ },
+ {
+  "id": 4,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "kind": "lease",
+  "title": "Interest cover covenant: not less than 150%",
+  "value": 1.5,
+  "unit": "x",
+  "effect": null,
+  "label": "Loan agreement",
+  "source": {
+   "dataset": "contract",
+   "file": "FA-BTR-014.pdf",
+   "page": 14,
+   "clause": "21.2",
+   "note": "Synthetic loan agreement"
+  }
+ },
+ {
+  "id": 5,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "kind": "msci",
+  "title": "Leeds office capital value index, 12 months",
+  "value": -4.1,
+  "unit": "%",
+  "effect": {
+   "metric": "ltv",
+   "amount": 4
+  },
+  "label": "Sample market trend (illustrative)",
+  "source": {
+   "label": "Sample market trend (illustrative)",
+   "note": "Derived figure, raw rows not shown."
+  }
+ },
+ {
+  "id": 6,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "kind": "value_comp",
+  "title": "Comparable office sales, GBP per sq ft",
+  "value": 212,
+  "unit": "GBP / sq ft",
+  "effect": null,
+  "label": "Auction results",
+  "source": {
+   "dataset": "listings",
+   "result_ids": [
+    "auc_2291",
+    "auc_2305"
+   ]
+  }
+ },
+ {
+  "id": 7,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-022",
+  "kind": "rent_comp",
+  "title": "Median studio rent nearby",
+  "value": 185,
+  "unit": "GBP pw",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_55010",
+    "lst_55044",
+    "lst_55090"
+   ]
+  }
+ },
+ {
+  "id": 8,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-007",
+  "kind": "hpi",
+  "title": "Bristol house price index, 6 months",
+  "value": -2.8,
+  "unit": "%",
+  "effect": null,
+  "label": "UK HPI",
+  "source": {
+   "url": "https://www.gov.uk/government/collections/uk-house-price-index-reports"
+  }
+ },
+ {
+  "id": 9,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-019",
+  "kind": "news",
+  "title": "Anchor tenant announces store review",
+  "value": null,
+  "unit": null,
+  "effect": {
+   "metric": "occupancy",
+   "amount": -3
+  },
+  "label": "News",
+  "source": {
+   "url": "https://example.com/news/retail-anchor-review",
+   "retrieved": "2026-11-09"
+  }
+ },
+ {
+  "id": 10,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-003",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1340,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40014"
+   ]
+  }
+ },
+ {
+  "id": 11,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-011",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1350,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40015"
+   ]
+  }
+ },
+ {
+  "id": 12,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-025",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1360,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40016"
+   ]
+  }
+ },
+ {
+  "id": 13,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-028",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1370,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40017"
+   ]
+  }
+ },
+ {
+  "id": 14,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-033",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1380,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40018"
+   ]
+  }
+ },
+ {
+  "id": 15,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-036",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1390,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40019"
+   ]
+  }
+ },
+ {
+  "id": 16,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-040",
+  "kind": "rent_comp",
+  "title": "Median rent nearby, stable",
+  "value": 1400,
+  "unit": "GBP pcm",
+  "effect": null,
+  "label": "Listings",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_40020"
+   ]
+  }
+ }
+]

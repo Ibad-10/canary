@@ -1,0 +1,101 @@
+[
+ {
+  "id": "run_2026-11-12_sample",
+  "created_at": "2026-11-12T19:04:00Z",
+  "mode": "live",
+  "as_of": "2026-11-12",
+  "cutoff": null,
+  "llm": "grok-sample",
+  "score": null
+ },
+ {
+  "id": "bt_2026-05-31_sample",
+  "created_at": "2026-11-12T19:00:00Z",
+  "mode": "backtest",
+  "as_of": "2026-11-12",
+  "cutoff": "2026-05-31",
+  "llm": "grok-sample",
+  "score": {
+   "caught": 3,
+   "missed": 1,
+   "false_alarms": 1,
+   "correct_green": 7,
+   "total_flagged_actual": 4,
+   "note": "backtest: forecast from data to 31 May 2026, checked against 12 Nov 2026",
+   "per_loan": [
+    {
+     "loan_id": "L-014",
+     "predicted": "red",
+     "actual": "red",
+     "outcome": "caught"
+    },
+    {
+     "loan_id": "L-031",
+     "predicted": "red",
+     "actual": "red",
+     "outcome": "caught"
+    },
+    {
+     "loan_id": "L-022",
+     "predicted": "amber",
+     "actual": "amber",
+     "outcome": "caught"
+    },
+    {
+     "loan_id": "L-007",
+     "predicted": "green",
+     "actual": "amber",
+     "outcome": "missed"
+    },
+    {
+     "loan_id": "L-019",
+     "predicted": "amber",
+     "actual": "green",
+     "outcome": "false_alarm"
+    },
+    {
+     "loan_id": "L-003",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-011",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-025",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-028",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-033",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-036",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    },
+    {
+     "loan_id": "L-040",
+     "predicted": "green",
+     "actual": "green",
+     "outcome": "correct"
+    }
+   ]
+  }
+ }
+]

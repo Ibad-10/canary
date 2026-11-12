@@ -1,0 +1,375 @@
+[
+ {
+  "id": 1,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0042",
+  "month": "2026-11-01",
+  "kind": "arrears",
+  "value": 6.8,
+  "unit": "% of rent roll",
+  "detail": "29 of 214 leases more than 30 days in arrears, GBP 96,400 owed. Up from 3.1% in June.",
+  "source": {
+   "dataset": "cortile",
+   "table": "lease_arrears",
+   "row_ids": [
+    4211,
+    4212,
+    4219,
+    4230
+   ]
+  }
+ },
+ {
+  "id": 2,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0042",
+  "month": "2026-11-01",
+  "kind": "sc_overspend",
+  "value": 212000,
+  "unit": "GBP",
+  "detail": "Service charge budget GBP 1.18m, spent GBP 1.39m year to date. Biggest lines: reactive repairs, insurance.",
+  "source": {
+   "dataset": "cortile",
+   "table": "service_charge_ledger",
+   "row_ids": [
+    880,
+    881,
+    882
+   ]
+  }
+ },
+ {
+  "id": 3,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0043",
+  "month": "2026-11-01",
+  "kind": "compliance_overdue",
+  "value": 47,
+  "unit": "days",
+  "detail": "Fire risk assessment due 26 Sep 2026, not completed.",
+  "source": {
+   "dataset": "cortile",
+   "table": "compliance_items",
+   "row_ids": [
+    3301
+   ]
+  }
+ },
+ {
+  "id": 4,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0043",
+  "month": "2026-11-01",
+  "kind": "ews_remediation",
+  "value": 1,
+  "unit": "EWS1 form",
+  "detail": "EWS1 form requested 3 Aug 2026, still pending.",
+  "source": {
+   "dataset": "cortile",
+   "table": "ews_forms",
+   "row_ids": [
+    77
+   ]
+  }
+ },
+ {
+  "id": 5,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0042",
+  "month": "2026-11-01",
+  "kind": "emergency_tickets",
+  "value": 14,
+  "unit": "tickets / month",
+  "detail": "Emergency repair tickets, up from 6 a month in spring.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    9101,
+    9102,
+    9103,
+    9110
+   ]
+  }
+ },
+ {
+  "id": 6,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "building_id": "bld_0041",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 3,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    8801,
+    8802
+   ]
+  }
+ },
+ {
+  "id": 7,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "building_id": "bld_0088",
+  "month": "2026-11-01",
+  "kind": "vacancy",
+  "value": 22,
+  "unit": "% vacant",
+  "detail": "Two floors vacant since the anchor tenant left in September.",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_71001",
+    "lst_71002"
+   ]
+  }
+ },
+ {
+  "id": 8,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "building_id": "bld_0088",
+  "month": "2026-11-01",
+  "kind": "compliance_missing",
+  "value": 1,
+  "unit": "certificate",
+  "detail": "No electrical safety report (EICR) on file for floors 4-6.",
+  "source": {
+   "dataset": "cortile",
+   "table": "compliance_items",
+   "row_ids": [
+    5120
+   ]
+  }
+ },
+ {
+  "id": 9,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "building_id": "bld_0088",
+  "month": "2026-11-01",
+  "kind": "sc_overspend",
+  "value": 64000,
+  "unit": "GBP",
+  "detail": "Service charge overspend, voids not recovered.",
+  "source": {
+   "dataset": "cortile",
+   "table": "service_charge_ledger",
+   "row_ids": [
+    1201,
+    1202
+   ]
+  }
+ },
+ {
+  "id": 10,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-022",
+  "building_id": "bld_0061",
+  "month": "2026-11-01",
+  "kind": "compliance_overdue",
+  "value": 34,
+  "unit": "days",
+  "detail": "Lift inspections overdue across two blocks.",
+  "source": {
+   "dataset": "cortile",
+   "table": "compliance_items",
+   "row_ids": [
+    4401,
+    4402
+   ]
+  }
+ },
+ {
+  "id": 11,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-022",
+  "building_id": "bld_0062",
+  "month": "2026-11-01",
+  "kind": "emergency_tickets",
+  "value": 11,
+  "unit": "tickets / month",
+  "detail": "Emergency tickets (heating, lifts).",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    7701,
+    7702,
+    7703
+   ]
+  }
+ },
+ {
+  "id": 12,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-007",
+  "building_id": "bld_0023",
+  "month": "2026-11-01",
+  "kind": "higher_risk",
+  "value": 1,
+  "unit": "building",
+  "detail": "Building classed higher-risk; remediation plan lodged.",
+  "source": {
+   "dataset": "cortile",
+   "table": "buildings",
+   "row_ids": [
+    23
+   ]
+  }
+ },
+ {
+  "id": 13,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-019",
+  "building_id": "bld_0095",
+  "month": "2026-11-01",
+  "kind": "vacancy",
+  "value": 15,
+  "unit": "% vacant",
+  "detail": "Two units vacant, one anchor lease up for break in 2027.",
+  "source": {
+   "dataset": "listings",
+   "listing_ids": [
+    "lst_61120",
+    "lst_61122"
+   ]
+  }
+ },
+ {
+  "id": 14,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-003",
+  "building_id": "bld_0005",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    113
+   ]
+  }
+ },
+ {
+  "id": 15,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-011",
+  "building_id": "bld_0071",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    114
+   ]
+  }
+ },
+ {
+  "id": 16,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-025",
+  "building_id": "bld_0033",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    115
+   ]
+  }
+ },
+ {
+  "id": 17,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-028",
+  "building_id": "bld_0012",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    116
+   ]
+  }
+ },
+ {
+  "id": 18,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-033",
+  "building_id": "bld_0102",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    117
+   ]
+  }
+ },
+ {
+  "id": 19,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-036",
+  "building_id": "bld_0044",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    118
+   ]
+  }
+ },
+ {
+  "id": 20,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-040",
+  "building_id": "bld_0081",
+  "month": "2026-11-01",
+  "kind": "reopened_tickets",
+  "value": 2,
+  "unit": "tickets",
+  "detail": "Reopened tickets, within normal range.",
+  "source": {
+   "dataset": "cortile",
+   "table": "tickets",
+   "row_ids": [
+    119
+   ]
+  }
+ }
+]

@@ -1,0 +1,101 @@
+[
+ {
+  "id": 1,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 1,
+  "step": "Load loan book",
+  "owner": "Canary engine",
+  "status": "done",
+  "detail": "12 synthetic loans on real Cortile developments",
+  "started_at": "2026-11-12T19:04:00.000Z",
+  "finished_at": "2026-11-12T19:04:03.000Z"
+ },
+ {
+  "id": 2,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 2,
+  "step": "Pull building signals",
+  "owner": "Canary engine",
+  "status": "done",
+  "detail": "Cortile: arrears, service charge, compliance, tickets",
+  "started_at": "2026-11-12T19:04:03.000Z",
+  "finished_at": "2026-11-12T19:04:09.000Z"
+ },
+ {
+  "id": 3,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 3,
+  "step": "Value comparables",
+  "owner": "Canary engine",
+  "status": "done",
+  "detail": "Listings and auction results, median with IQR",
+  "started_at": "2026-11-12T19:04:09.000Z",
+  "finished_at": "2026-11-12T19:04:14.000Z"
+ },
+ {
+  "id": 4,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 4,
+  "step": "Market trend",
+  "owner": "Canary engine",
+  "status": "fallback",
+  "detail": "MSCI RCA unavailable for 2 sectors; used UK HPI",
+  "started_at": "2026-11-12T19:04:14.000Z",
+  "finished_at": "2026-11-12T19:04:20.000Z"
+ },
+ {
+  "id": 5,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 5,
+  "step": "Tenant news",
+  "owner": "Grok",
+  "status": "done",
+  "detail": "9 hits classified, 1 operator_distress",
+  "started_at": "2026-11-12T19:04:20.000Z",
+  "finished_at": "2026-11-12T19:04:31.000Z"
+ },
+ {
+  "id": 6,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 6,
+  "step": "Recall corrections",
+  "owner": "Canary engine",
+  "status": "done",
+  "detail": "0 corrections applied",
+  "started_at": "2026-11-12T19:04:31.000Z",
+  "finished_at": "2026-11-12T19:04:33.000Z"
+ },
+ {
+  "id": 7,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 7,
+  "step": "Forecast covenants",
+  "owner": "Canary engine",
+  "status": "done",
+  "detail": "6 months ahead, 2 red, 3 amber, 7 green",
+  "started_at": "2026-11-12T19:04:33.000Z",
+  "finished_at": "2026-11-12T19:04:35.000Z"
+ },
+ {
+  "id": 8,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 8,
+  "step": "Draft memo and chases",
+  "owner": "Grok",
+  "status": "done",
+  "detail": "1 memo, 2 chases, numbers quoted from forecast only",
+  "started_at": "2026-11-12T19:04:35.000Z",
+  "finished_at": "2026-11-12T19:04:52.000Z"
+ },
+ {
+  "id": 9,
+  "run_id": "run_2026-11-12_sample",
+  "seq": 9,
+  "step": "Analyst sign-off",
+  "owner": "Ibad Zuberi",
+  "status": "waiting",
+  "detail": "Waiting for a human decision. Nothing is sent.",
+  "started_at": "2026-11-12T19:05:52.000Z",
+  "finished_at": null
+ }
+]

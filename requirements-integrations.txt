@@ -1,0 +1,10 @@
+openai
+parallel-web
+httpx
+python-dotenv
+pypdf
+reportlab
+fastapi
+uvicorn
+pydantic
+supabase

@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Canary · Loan early-warning desk (mockup v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif'],serif:['"Instrument Serif"','Georgia','serif']},
+colors:{page:'#F4F1EC',card:'#FFFFFF',line:'#E6E1D8',ink:'#1E1D1A',sub:'#5F5B53',gold:'#7A5A00',canary:'#FFD60A',
+ red:{t:'#B42318',bg:'#FEF3F2',bd:'#FECDCA',dot:'#D92D20'},amb:{t:'#B54708',bg:'#FFFAEB',bd:'#FEDF89',dot:'#F79009'},grn:{t:'#067647',bg:'#ECFDF3',bd:'#ABEFC6',dot:'#17B26A'},blu:{t:'#175CD3',bg:'#EFF8FF',bd:'#B2DDFF'}}}}}
+</script>
+<style>
+:root{--ease:cubic-bezier(.22,1.2,.36,1);--soft:cubic-bezier(.2,.8,.2,1)}
+html,body{background:#F4F1EC;color:#1E1D1A;font-family:Inter,system-ui;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.tnum{font-variant-numeric:tabular-nums}
+.card{background:#fff;border:1px solid #E6E1D8;border-radius:14px;box-shadow:0 1px 2px rgba(30,29,26,.04),0 4px 16px -8px rgba(30,29,26,.08)}
+.serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
+:focus-visible{outline:2px solid #1E1D1A;outline-offset:2px;border-radius:8px}
+.btn{min-height:32px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;transition:transform .2s var(--ease),background .2s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn-dark{background:#1E1D1A;color:#fff}.btn-dark:hover{background:#34322D}
+.btn-ghost{background:#fff;border:1px solid #E6E1D8;color:#1E1D1A}.btn-ghost:hover{background:#FAF8F4}
+.chip{min-height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;font-size:13px;border:1px solid #E6E1D8;background:#fff;color:#5F5B53;transition:all .2s var(--soft)}
+.chip:hover{color:#1E1D1A}.chip[aria-pressed=true]{background:#1E1D1A;color:#fff;border-color:#1E1D1A}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid;transition:all .35s var(--soft)}
+.p-red{color:#B42318;background:#FEF3F2;border-color:#FECDCA}.p-amb{color:#B54708;background:#FFFAEB;border-color:#FEDF89}.p-grn{color:#067647;background:#ECFDF3;border-color:#ABEFC6}
+.src{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:#5F5B53;background:#FAF8F4;border:1px solid #E6E1D8;cursor:pointer;transition:all .15s}
+.src:hover{color:#1E1D1A;border-color:#CFC8BB;background:#fff}
+.nav a{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:8px;font-size:14px;color:#5F5B53}
+.nav a:hover{background:#ECE8E1;color:#1E1D1A}.nav a[aria-current=page]{background:#fff;color:#1E1D1A;box-shadow:0 1px 2px rgba(30,29,26,.08);border:1px solid #E6E1D8}
+.view{display:none}.view.on{display:block}
+.rise{opacity:0;transform:translateY(10px)}.on .rise{animation:rise .6s var(--soft) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.dotgrid{background-image:radial-gradient(#DDD7CC 1px,transparent 1px);background-size:16px 16px}
+.bracket{position:relative}.bracket::before,.bracket::after{content:"";position:absolute;width:8px;height:8px;border-color:#B7AF9F}
+.bracket::before{top:-1px;left:-1px;border-top:1px solid;border-left:1px solid}.bracket::after{bottom:-1px;right:-1px;border-bottom:1px solid;border-right:1px solid}
+tbody tr{transition:background .15s}tbody tr:hover{background:#FAF8F4}
+tbody tr.flash td{animation:flash 1s var(--soft)}@keyframes flash{0%{background:#FFF6CC}100%{background:transparent}}
+#drawer{transform:translateX(105%);transition:transform .45s var(--ease)}#drawer.open{transform:none}
+#scrim{opacity:0;pointer-events:none;transition:opacity .3s}#scrim.open{opacity:1;pointer-events:auto}
+.pop{position:absolute;z-index:60;width:320px;opacity:0;transform:translateY(4px) scale(.98);pointer-events:none;transition:all .2s var(--soft)}.pop.open{opacity:1;transform:none;pointer-events:auto}
+.tip{position:relative}.tip .tt{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);opacity:0;pointer-events:none;background:#1E1D1A;color:#fff;font-size:12px;line-height:18px;padding:8px 10px;border-radius:8px;width:240px;transition:all .15s;z-index:40;font-weight:400;text-align:left}
+.tip:hover .tt,.tip:focus-within .tt{opacity:1;transform:translateX(-50%)}
+input[type=range]{accent-color:#1E1D1A;height:24px}
+.flowpath{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}@keyframes dash{to{stroke-dashoffset:-24}}
+.step[aria-current=step] .sn{background:#1E1D1A;color:#fff;border-color:#1E1D1A}
+.step.done .sn{background:#ECFDF3;color:#067647;border-color:#ABEFC6}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rise{opacity:1;transform:none}}
+</style>
+</head>
+<body class="min-h-screen">
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 btn btn-dark z-50">Skip to content</a>
+<div class="flex h-screen">
+ <!-- Sidebar (V7 Go-style light rail) -->
+ <aside class="w-[232px] shrink-0 flex flex-col px-3 py-4 border-r border-line bg-[#EFEBE4]" aria-label="Sidebar">
+  <div class="flex items-center gap-2 px-2 h-8">
+   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="#FFD60A"/><path d="M6.5 14.2c0-3.6 2.6-6.4 6-6.4 1.9 0 3.3 1 4 2.4l2.1-.3-1.7 1.7c.1 3.3-2.4 6.1-6.1 6.1H7l1.7-1.5c-1.3-.4-2.2-1.1-2.2-2z" fill="#1E1D1A"/><circle cx="14.4" cy="10.9" r=".9" fill="#FFD60A"/></svg>
+   <span class="font-semibold text-[15px]">Canary</span>
+   
+  </div>
+  <nav class="nav mt-6 flex flex-col gap-1" aria-label="Main">
+   <a href="#today" data-v="today"><i data-lucide="sun" class="w-4 h-4" aria-hidden="true"></i>Today<span class="ml-auto text-[12px] font-medium text-red-t tnum">2</span></a>
+   <a href="#loan" data-v="loan"><i data-lucide="building-2" class="w-4 h-4" aria-hidden="true"></i>Loan detail</a>
+   <a href="#memo" data-v="memo"><i data-lucide="file-pen-line" class="w-4 h-4" aria-hidden="true"></i>Memo</a>
+   <a href="#log" data-v="log"><i data-lucide="list-checks" class="w-4 h-4" aria-hidden="true"></i>Activity</a>
+  </nav>
+  <div class="mt-6 px-2 text-[12px] text-sub flex items-center gap-1"><i data-lucide="chevron-down" class="w-3 h-3" aria-hidden="true"></i>Pinned loans</div>
+  <div class="nav mt-1 flex flex-col gap-1">
+   <a href="#loan" data-v="loan"><span class="w-2 h-2 rounded-full bg-red-dot" aria-hidden="true"></span>Riverside BTR</a>
+   <a href="#today"><span class="w-2 h-2 rounded-full bg-red-dot" aria-hidden="true"></span>Quayside Offices</a>
+   <a href="#today"><span class="w-2 h-2 rounded-full bg-amb-dot" aria-hidden="true"></span>Canal St Student</a>
+  </div>
+  <div class="mt-6 px-2 text-[12px] text-sub">Data sources</div>
+  <ul class="mt-2 px-2 space-y-2 text-[13px] text-sub">
+   <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t" aria-hidden="true"></i>Cortile buildings</li>
+   <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t" aria-hidden="true"></i>MSCI market values</li>
+   <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t" aria-hidden="true"></i>Tenant news</li>
+   <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t" aria-hidden="true"></i>Loan agreements</li>
+  </ul>
+  <div class="mt-auto rounded-xl border border-dashed border-[#CFC8BB] p-3 text-[12px] leading-5 text-sub">
+   <div class="flex items-center gap-2 font-medium text-ink"><i data-lucide="flask-conical" class="w-4 h-4" aria-hidden="true"></i>Synthetic example data</div>
+   Every loan, borrower and number here is made up for the demo.
+  </div>
+ </aside>
+
+ <div class="flex-1 flex flex-col min-w-0">
+  <!-- Top bar -->
+  <header class="h-14 shrink-0 flex items-center gap-4 px-6 border-b border-line bg-page/80 backdrop-blur">
+   <nav aria-label="Breadcrumb"><ol class="flex items-center gap-2 text-[13px] text-sub"><li>Loan book</li><li aria-hidden="true">/</li><li class="text-ink font-medium" id="crumb" aria-current="page">Today</li></ol></nav>
+   <span class="pill" style="color:#7A5A00;background:#FFF6CC;border-color:#F5DC6E"><i data-lucide="flask-conical" class="w-3 h-3" aria-hidden="true"></i>Synthetic example data</span>
+   <label class="ml-auto relative"><span class="sr-only">Search everything</span>
+    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2 text-sub" aria-hidden="true"></i>
+    <input class="h-8 w-[280px] rounded-full border border-line bg-white pl-9 pr-12 text-[13px] placeholder:text-sub" placeholder="Search loans, buildings…">
+    <kbd class="absolute right-3 top-[7px] text-[11px] text-sub border border-line rounded px-1">⌘K</kbd></label>
+   <button class="btn btn-ghost !px-2 !w-8 !h-8 justify-center" aria-label="Notifications, 3 new"><i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i></button>
+   <span class="w-8 h-8 rounded-full bg-[#E9E3D7] grid place-items-center text-[12px] font-semibold" aria-label="Signed in as Ibad">IZ</span>
+  </header>
+
+  <!-- Stepper (guided workflow) -->
+  <div class="shrink-0 px-6 py-3 border-b border-line bg-[#F8F6F2]">
+   <ol class="flex items-center gap-2 text-[13px]" aria-label="Review progress" id="stepper">
+    <li class="step flex items-center gap-2" data-s="today"><a href="#today" class="flex items-center gap-2 h-8 px-2 rounded-lg hover:bg-white"><span class="sn w-6 h-6 rounded-full border border-line grid place-items-center text-[12px] font-semibold bg-white">1</span>Review alerts</a></li>
+    <li aria-hidden="true" class="w-10 h-px bg-line"></li>
+    <li class="step flex items-center gap-2" data-s="loan"><a href="#loan" class="flex items-center gap-2 h-8 px-2 rounded-lg hover:bg-white"><span class="sn w-6 h-6 rounded-full border border-line grid place-items-center text-[12px] font-semibold bg-white">2</span>Check the evidence</a></li>
+    <li aria-hidden="true" class="w-10 h-px bg-line"></li>
+    <li class="step flex items-center gap-2" data-s="memo"><a href="#memo" class="flex items-center gap-2 h-8 px-2 rounded-lg hover:bg-white"><span class="sn w-6 h-6 rounded-full border border-line grid place-items-center text-[12px] font-semibold bg-white">3</span>Approve memo</a></li>
+    <li aria-hidden="true" class="w-10 h-px bg-line"></li>
+    <li class="step flex items-center gap-2" data-s="log"><a href="#log" class="flex items-center gap-2 h-8 px-2 rounded-lg hover:bg-white"><span class="sn w-6 h-6 rounded-full border border-line grid place-items-center text-[12px] font-semibold bg-white">4</span>Send chase <span class="text-sub">(draft)</span></a></li>
+    <li class="ml-auto text-[12px] text-sub" id="stepHint">Step 1 of 4 · about 5 minutes</li>
+   </ol>
+  </div>
+
+  <main id="main" class="flex-1 overflow-y-auto">
+  <div class="px-6 py-6 max-w-[1180px]">
+
+  <!-- ================= TODAY ================= -->
+  <section id="v-today" class="view" aria-labelledby="h-today">
+   <div class="grid grid-cols-[1fr_300px] gap-4">
+    <div class="card rise p-6 relative overflow-hidden" style="animation-delay:0ms">
+     <div class="absolute right-0 top-0 bottom-0 w-[300px] dotgrid opacity-70" aria-hidden="true" style="mask-image:linear-gradient(90deg,transparent,#000)"></div>
+     <p class="text-[13px] text-sub">Thursday 12 November · scanned 12 loans at 19:04</p>
+     <h1 id="h-today" class="serif text-[44px] leading-[48px] mt-2 max-w-[560px]">Good evening, Ibad. <span class="italic">2 loans</span> need you today.</h1>
+     <p class="text-[15px] text-sub mt-2 max-w-[560px]">Riverside BTR's rent may stop covering its interest in about 3 months, and Quayside Offices' value is drifting towards its limit. Everything else looks steady.</p>
+     <div class="flex items-center gap-2 mt-4">
+      <a href="#loan" class="btn btn-dark">Start with Riverside BTR <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i></a>
+      <button class="btn btn-ghost" onclick="setFilter('action')">See both</button>
+     </div>
+    </div>
+    <div class="card rise p-4 flex flex-col" style="animation-delay:60ms" aria-labelledby="h-stress">
+     <div class="flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4" aria-hidden="true"></i><h2 id="h-stress" class="text-[14px] font-semibold">What if…?</h2><span class="ml-auto text-[12px] text-sub">Stress test</span></div>
+     <p class="text-[12px] text-sub mt-1">Move the sliders and the table re-checks every loan.</p>
+     <label class="mt-4 text-[13px] flex justify-between"><span>Interest rates rise by</span><span class="tnum font-semibold" id="rv">+0.0%</span></label>
+     <input id="rate" type="range" min="0" max="4" step=".5" value="0" aria-describedby="rv" class="w-full">
+     <label class="mt-2 text-[13px] flex justify-between"><span>Property values fall by</span><span class="tnum font-semibold" id="vv">0%</span></label>
+     <input id="val" type="range" min="0" max="25" step="1" value="0" aria-describedby="vv" class="w-full">
+     <div class="mt-auto pt-2 text-[12px] text-sub" id="stressMsg" aria-live="polite"></div>
+    </div>
+   </div>
+
+   <!-- Summary metrics (V7-style tinted cards) -->
+   <div class="grid grid-cols-4 gap-4 mt-4" id="kpis"></div>
+
+   <!-- Onboarding hint -->
+   <div id="hint" class="rise mt-4 flex items-center gap-3 rounded-xl border border-[#F5DC6E] bg-[#FFFBEB] px-4 py-2 text-[13px]" style="animation-delay:200ms" role="note">
+    <i data-lucide="lightbulb" class="w-4 h-4 text-gold" aria-hidden="true"></i>
+    <span><b>Tip:</b> click any row to peek at a loan without leaving this page. Hover a column name to see what it means.</span>
+    <button class="ml-auto btn !min-h-[24px] !px-2 text-sub hover:text-ink" onclick="this.parentElement.remove()" aria-label="Dismiss tip"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button>
+   </div>
+
+   <!-- Table -->
+   <div class="card rise mt-4 overflow-hidden" style="animation-delay:240ms">
+    <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-line">
+     <h2 class="text-[15px] font-semibold mr-2">Loan book</h2>
+     <div role="group" aria-label="Filter by status" class="flex gap-1" id="fStatus">
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="action" aria-pressed="false"><span class="w-2 h-2 rounded-full bg-red-dot" aria-hidden="true"></span>Needs action</button>
+      <button class="chip" data-f="watch" aria-pressed="false"><span class="w-2 h-2 rounded-full bg-amb-dot" aria-hidden="true"></span>Watching</button>
+      <button class="chip" data-f="ok" aria-pressed="false"><span class="w-2 h-2 rounded-full bg-grn-dot" aria-hidden="true"></span>Healthy</button>
+     </div>
+     <span class="w-px h-6 bg-line mx-1" aria-hidden="true"></span>
+     <div role="group" aria-label="Filter by property type" class="flex gap-1" id="fType">
+      <button class="chip" data-f="res" aria-pressed="false"><i data-lucide="home" class="w-3 h-3" aria-hidden="true"></i>Residential</button>
+      <button class="chip" data-f="com" aria-pressed="false"><i data-lucide="briefcase" class="w-3 h-3" aria-hidden="true"></i>Commercial</button>
+     </div>
+     <label class="ml-auto relative"><span class="sr-only">Search the loan book</span>
+      <i data-lucide="search" class="w-4 h-4 absolute left-3 top-[6px] text-sub" aria-hidden="true"></i>
+      <input id="q" class="h-7 w-[200px] rounded-full border border-line bg-white pl-9 pr-3 text-[13px] placeholder:text-sub" placeholder="Name or city"></label>
+    </div>
+    <div class="max-h-[440px] overflow-y-auto">
+    <table class="w-full text-[13px]">
+     <caption class="sr-only">Loans with covenant health. Click a row to open its summary.</caption>
+     <thead class="sticky top-0 z-10 bg-[#FAF8F4] text-[12px] text-sub"><tr class="border-b border-line" id="thead"></tr></thead>
+     <tbody id="rows"></tbody>
+    </table>
+    <div id="empty" class="hidden py-12 text-center">
+     <i data-lucide="search-x" class="w-6 h-6 mx-auto text-sub" aria-hidden="true"></i>
+     <p class="mt-2 font-medium">No loans match</p><p class="text-[13px] text-sub">Try a different filter or clear the search.</p>
+     <button class="btn btn-ghost mt-4" onclick="resetFilters()">Clear filters</button>
+    </div>
+    </div>
+    <div class="flex items-center px-4 h-10 border-t border-line text-[12px] text-sub"><span id="count" aria-live="polite"></span><span class="ml-auto">Sorted by <b id="sortLabel" class="text-ink font-medium"></b></span></div>
+   </div>
+  </section>
+
+  <!-- ================= LOAN ================= -->
+  <section id="v-loan" class="view" aria-labelledby="h-loan">
+   <div class="grid grid-cols-[1fr_300px] gap-4">
+    <div>
+     <div class="rise flex items-center gap-2 text-[13px] text-sub"><span class="w-6 h-6 rounded-md bg-[#E9E3D7] grid place-items-center"><i data-lucide="building-2" class="w-4 h-4" aria-hidden="true"></i></span>Riverside BTR · Manchester · CN-014 · Build-to-rent, 214 homes<span class="pill p-red ml-2"><i data-lucide="alert-triangle" class="w-3 h-3" aria-hidden="true"></i>Needs action</span></div>
+     <p class="rise text-[13px] text-sub mt-4" style="animation-delay:40ms">What Canary found</p>
+     <h1 id="h-loan" class="rise serif text-[40px] leading-[44px] mt-1" style="animation-delay:60ms">Rent may stop covering interest by March.</h1>
+     <p class="rise text-[15px] text-sub mt-2 max-w-[680px]" style="animation-delay:80ms">Arrears and rising service costs are eating the rental income. On today's trend, rent covers interest <b class="text-ink">1.42 times</b> by the next test date. The loan agreement needs at least <b class="text-ink">1.50 times</b>.</p>
+     <div class="grid grid-cols-3 gap-4 mt-4" id="gauges"></div>
+    </div>
+    <!-- Decision card -->
+    <div class="rise rounded-[14px] p-4 text-white flex flex-col" style="background:linear-gradient(160deg,#2B2A26,#1E1D1A);animation-delay:100ms">
+     <div class="flex items-center text-[12px] text-[#D9D4CA]">Next covenant test<span class="ml-auto pill !h-6 !text-[#1E1D1A] !border-0" style="background:#FFD60A">139 days left</span></div>
+     <div class="serif text-[32px] leading-10 mt-1">31 Mar 2027</div>
+     <p class="text-[13px] text-[#D9D4CA] mt-2 leading-5">Canary suggests moving this loan to the red watchlist and asking the borrower for an updated rent roll.</p>
+     <a href="#memo" class="btn mt-4 justify-center bg-white text-ink hover:bg-[#F4F1EC]">Review the memo</a>
+     <button class="btn mt-2 justify-center border border-[#4A4740] text-white hover:bg-white/10">Not a concern — dismiss</button>
+     <div class="mt-4 pt-4 border-t border-[#3A3833] text-[12px] text-[#D9D4CA] space-y-2">
+      <div class="flex justify-between"><span>Loan amount</span><span class="tnum text-white">£14.5m</span></div>
+      <div class="flex justify-between"><span>Interest</span><span class="tnum text-white">SONIA + 3.1%</span></div>
+      <div class="flex justify-between"><span>Matures</span><span class="tnum text-white">Sep 2028</span></div>
+     </div>
+    </div>
+   </div>
+
+   <!-- Flow graph (V7 workflow-node style) -->
+   <div class="card rise mt-4 overflow-hidden" style="animation-delay:160ms">
+    <div class="flex items-center gap-2 px-4 h-12 border-b border-line">
+     <i data-lucide="workflow" class="w-4 h-4" aria-hidden="true"></i><h2 class="text-[14px] font-semibold">How we got here</h2>
+     <span class="text-[12px] text-sub ml-2">Loan → Buildings → Warning signs → Rule at risk</span>
+     <span class="ml-auto flex items-center gap-4 text-[12px] text-sub"><span class="flex items-center gap-1"><span class="w-4 h-[2px] bg-red-dot" aria-hidden="true"></span>Problem path</span><span class="flex items-center gap-1"><span class="w-4 h-px bg-[#CFC8BB]" aria-hidden="true"></span>Checked, fine</span></span>
+    </div>
+    <div class="relative dotgrid" id="flow" style="height:400px" role="img" aria-label="Flow diagram: Riverside loan to Blocks B and C, to arrears, service charge and an overdue fire assessment, leading to the interest cover rule at risk."></div>
+   </div>
+
+   <!-- Evidence table -->
+   <div class="card rise mt-4 overflow-visible" style="animation-delay:220ms">
+    <div class="flex items-center gap-2 px-4 h-12 border-b border-line"><i data-lucide="file-search" class="w-4 h-4" aria-hidden="true"></i><h2 class="text-[14px] font-semibold">Every number, with its source</h2><span class="ml-auto text-[12px] text-sub">Click a source to preview it</span></div>
+    <table class="w-full text-[13px]">
+     <thead class="text-[12px] text-sub bg-[#FAF8F4]"><tr><th scope="col" class="text-left font-medium px-4 h-8">Finding</th><th scope="col" class="text-right font-medium">Value</th><th scope="col" class="text-left font-medium pl-8">Why it matters</th><th scope="col" class="text-left font-medium px-4">Source</th></tr></thead>
+     <tbody id="evidence"></tbody>
+    </table>
+   </div>
+   <div id="pop" class="pop card p-4" role="dialog" aria-label="Source preview"></div>
+  </section>
+
+  <!-- ================= MEMO ================= -->
+  <section id="v-memo" class="view" aria-labelledby="h-memo">
+   <div class="grid grid-cols-[1fr_320px] gap-4">
+    <article class="card rise p-8">
+     <div class="flex items-center gap-2 text-[12px] text-sub"><i data-lucide="sparkles" class="w-4 h-4 text-gold" aria-hidden="true"></i>Drafted by Canary at 19:05 · waiting for your sign-off<span class="ml-auto pill p-amb"><i data-lucide="clock" class="w-3 h-3" aria-hidden="true"></i>Waiting sign-off</span></div>
+     <h1 id="h-memo" class="serif text-[40px] leading-[44px] mt-4">Watchlist memo: Riverside BTR</h1>
+     <p class="text-[13px] text-sub mt-1">CN-014 · Prepared for credit committee, 26 Nov 2026 · <span class="text-gold">Synthetic example</span></p>
+     <div class="mt-6 rounded-xl bg-red-bg border border-red-bd px-4 py-3 text-[14px] text-red-t flex gap-2"><i data-lucide="flag" class="w-4 h-4 mt-[3px]" aria-hidden="true"></i><span><b>Recommendation:</b> move to the red watchlist and request an updated rent roll.</span></div>
+     <div class="text-[15px] leading-[26px] text-[#3A3833] mt-6 space-y-4 max-w-[640px]">
+      <h2 class="text-[17px] font-semibold text-ink">In short</h2>
+      <p>Rent at Riverside BTR is forecast to cover interest only <b>1.42 times</b> by the March test, below the <b>1.50 times</b> the loan requires<a href="#fn5" class="fnref">5</a>. Arrears have climbed to <b>6.8%</b> of the rent roll<a href="#fn1" class="fnref">1</a> and service costs are <b>£212k</b> over budget this year<a href="#fn2" class="fnref">2</a>.</p>
+      <h2 class="text-[17px] font-semibold text-ink">What changed</h2>
+      <ul class="space-y-2 list-disc pl-5 marker:text-[#B7AF9F]">
+       <li>Block C's fire risk assessment is <b>47 days overdue</b> and its cladding form (EWS1) is still pending<a href="#fn3" class="fnref">3</a>. Lenders may struggle to refinance until this is fixed.</li>
+       <li>Recent nearby sales put the value at <b>£20.1m–£21.8m</b><a href="#fn4" class="fnref">4</a>, so the loan is 66–72% of value against a 70% limit.</li>
+       <li>The ground-floor gym operator announced closures elsewhere<a href="#fn6" class="fnref">6</a>. It is a small part of income (see correction).</li>
+      </ul>
+      <h2 class="text-[17px] font-semibold text-ink">Next steps</h2>
+      <ol class="space-y-2 list-decimal pl-5 marker:text-sub"><li>Ask the borrower for the rent roll and arrears ageing (draft ready, not sent).</li><li>Order a desktop valuation before the March test.</li><li>Add to the 26 Nov credit committee.</li></ol>
+     </div>
+     <footer class="mt-8 pt-4 border-t border-line text-[12px] text-sub space-y-1" aria-label="Sources">
+      <p id="fn1"><b class="text-ink">1</b> Cortile · building bld_0042 · lease arrears, 10 Nov 2026</p>
+      <p id="fn2"><b class="text-ink">2</b> Cortile · building bld_0042 · service charge ledger</p>
+      <p id="fn3"><b class="text-ink">3</b> Cortile · building bld_0043 · compliance (FRA, EWS1)</p>
+      <p id="fn4"><b class="text-ink">4</b> MSCI RCA · 6 comparable sales (licensed, not shown publicly)</p>
+      <p id="fn5"><b class="text-ink">5</b> Loan agreement · page 14, clause 21.2 (synthetic)</p>
+      <p id="fn6"><b class="text-ink">6</b> Tenant news via Parallel search, 8 Nov 2026</p>
+     </footer>
+    </article>
+    <div class="flex flex-col gap-4">
+     <div class="card rise p-4" style="animation-delay:60ms">
+      <h2 class="text-[14px] font-semibold">Your decision</h2>
+      <p class="text-[12px] text-sub mt-1">Nothing is sent until you approve.</p>
+      <div class="grid gap-2 mt-4">
+       <button class="btn btn-dark justify-center" id="approve"><i data-lucide="check" class="w-4 h-4" aria-hidden="true"></i>Approve memo</button>
+       <div class="grid grid-cols-2 gap-2"><button class="btn btn-ghost justify-center"><i data-lucide="pencil" class="w-4 h-4" aria-hidden="true"></i>Edit</button><button class="btn btn-ghost justify-center text-red-t"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>Reject</button></div>
+      </div>
+     </div>
+     <div class="card rise p-4" style="animation-delay:100ms">
+      <h2 class="text-[14px] font-semibold flex items-center gap-2"><i data-lucide="pen-line" class="w-4 h-4" aria-hidden="true"></i>Your correction</h2>
+      <div class="mt-2 text-[13px] leading-5">
+       <p class="text-sub line-through decoration-[#B7AF9F]">“The gym is 18% of income.”</p>
+       <p class="mt-1">“The gym is 4% of income. Residential rent drives the cover ratio.”</p>
+       <p class="text-[12px] text-sub mt-2">Canary will remember this for similar loans.</p>
+      </div>
+     </div>
+     <div class="card rise p-4" style="animation-delay:140ms">
+      <h2 class="text-[14px] font-semibold flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4" aria-hidden="true"></i>Chase to borrower<span class="ml-auto pill" style="color:#5F5B53;background:#F4F1EC;border-color:#E6E1D8">Draft · not sent</span></h2>
+      <p class="text-[13px] text-sub mt-2 leading-5">“Hi Sam, ahead of the March covenant test, could you share the current rent roll and arrears ageing for Riverside Blocks A–C by 19 Nov? Thanks.”</p>
+      <a href="#log" class="btn btn-ghost mt-4 w-full justify-center">Review chase <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i></a>
+     </div>
+    </div>
+   </div>
+   <div id="toast" role="status" class="fixed bottom-6 right-6 card px-4 h-12 flex items-center gap-2 text-[14px]" style="box-shadow:0 12px 32px -8px rgba(30,29,26,.25)">
+    <span class="w-6 h-6 rounded-full bg-grn-bg grid place-items-center"><i data-lucide="check" class="w-4 h-4 text-grn-t" aria-hidden="true"></i></span>Correction saved to Canary's memory
+   </div>
+  </section>
+
+  <!-- ================= LOG ================= -->
+  <section id="v-log" class="view" aria-labelledby="h-log">
+   <p class="rise text-[13px] text-sub">Riverside BTR · CN-014</p>
+   <h1 id="h-log" class="rise serif text-[40px] leading-[44px] mt-1" style="animation-delay:40ms">Who did what, and when.</h1>
+   <p class="rise text-[15px] text-sub mt-1" style="animation-delay:60ms">Each step is logged with its owner and time, so anyone can audit the decision.</p>
+   <div class="grid grid-cols-[1fr_340px] gap-4 mt-6">
+    <div class="card rise p-6 dotgrid" style="animation-delay:100ms"><ol id="timeline" class="flex flex-col items-center"></ol></div>
+    <div class="flex flex-col gap-4">
+     <div class="card rise p-6" style="animation-delay:160ms">
+      <div class="flex items-center"><h2 class="text-[14px] font-semibold">How accurate is Canary?</h2><span class="ml-auto pill" style="color:#7A5A00;background:#FFF6CC;border-color:#F5DC6E">Example</span></div>
+      <p class="text-[12px] text-sub mt-1">We hid 20 problems in the synthetic loan book.</p>
+      <div class="serif text-[56px] leading-[56px] mt-4"><span class="tnum" data-count="18">18</span><span class="text-sub text-[32px]"> of 20 caught</span></div>
+      <div class="flex h-2 rounded-full overflow-hidden mt-4 gap-[2px]" aria-hidden="true"><div class="bg-grn-dot" style="width:90%"></div><div class="bg-red-dot" style="width:10%"></div></div>
+      <ul class="mt-4 space-y-2 text-[13px]">
+       <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t" aria-hidden="true"></i>Caught<span class="ml-auto tnum font-medium">18</span></li>
+       <li class="flex items-center gap-2"><i data-lucide="circle-x" class="w-4 h-4 text-red-t" aria-hidden="true"></i>Missed<span class="ml-auto tnum font-medium">2</span></li>
+       <li class="flex items-center gap-2"><i data-lucide="bell-off" class="w-4 h-4 text-amb-t" aria-hidden="true"></i>False alarms<span class="ml-auto tnum font-medium">1</span></li>
+      </ul>
+     </div>
+     <div class="card rise p-6" style="animation-delay:200ms">
+      <h2 class="text-[14px] font-semibold">Time to a signed-off watchlist</h2>
+      <div class="flex items-end gap-6 mt-4"><div><div class="serif text-[40px] leading-[40px] tnum">4 min</div><div class="text-[12px] text-sub mt-1">With Canary</div></div><div><div class="serif text-[40px] leading-[40px] text-sub">~2 days</div><div class="text-[12px] text-sub mt-1">By hand (estimate)</div></div></div>
+      <p class="text-[12px] text-sub mt-4">Placeholder until we time it live.</p>
+     </div>
+    </div>
+   </div>
+  </section>
+  </div>
+  </main>
+ </div>
+</div>
+
+<!-- Drawer -->
+<div id="scrim" class="fixed inset-0 bg-[#1E1D1A]/20 z-40" onclick="closeDrawer()"></div>
+<aside id="drawer" class="fixed top-0 right-0 bottom-0 w-[420px] bg-white border-l border-line z-50 flex flex-col" role="dialog" aria-modal="true" aria-labelledby="d-title" style="box-shadow:-24px 0 48px -24px rgba(30,29,26,.25)"></aside>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+// ---------- Data (synthetic) ----------
+const LOANS=[
+ {id:'CN-014',mo:3,name:'Riverside BTR',city:'Manchester',type:'Build-to-rent',cat:'res',ltv:64,icr:1.58,occ:91,trend:-.16,amt:14.5,why:'Arrears up, fire check overdue'},
+ {id:'CN-031',mo:5,name:'Quayside Offices',city:'Leeds',type:'Office',cat:'com',ltv:66,icr:1.62,occ:78,trend:-.08,amt:11.2,why:'Value drifting down, 22% empty'},
+ {id:'CN-022',mo:8,name:'Canal Street Student',city:'Birmingham',type:'Student',cat:'res',ltv:58,icr:1.71,occ:88,trend:-.06,amt:9.8,why:'Lift checks overdue'},
+ {id:'CN-007',mo:11,name:'Hartley Court',city:'Bristol',type:'Buy-to-let block',cat:'res',ltv:55,icr:1.74,occ:94,trend:-.04,amt:6.1,why:'Repairs backlog rising'},
+ {id:'CN-019',mo:12,name:'Market Row',city:'Sheffield',type:'Retail',cat:'com',ltv:57,icr:1.78,occ:85,trend:-.05,amt:7.4,why:'Anchor tenant in the news'},
+ {id:'CN-003',name:'Aldgate Lofts',city:'London',type:'Build-to-rent',cat:'res',ltv:52,icr:1.98,occ:97,trend:0,amt:21.0,why:'—'},
+ {id:'CN-011',name:'Ferry Lane Student',city:'Glasgow',type:'Student',cat:'res',ltv:49,icr:2.12,occ:99,trend:0,amt:8.3,why:'—'},
+ {id:'CN-025',name:'Kingsway',city:'Liverpool',type:'Build-to-rent',cat:'res',ltv:54,icr:1.89,occ:95,trend:-.01,amt:16.7,why:'—'},
+ {id:'CN-028',name:'Elm Park',city:'Leicester',type:'Buy-to-let block',cat:'res',ltv:47,icr:2.20,occ:96,trend:0,amt:4.9,why:'—'},
+ {id:'CN-033',name:'Northgate House',city:'Cambridge',type:'Office',cat:'com',ltv:50,icr:2.05,occ:92,trend:-.02,amt:18.9,why:'—'},
+ {id:'CN-036',name:'Wharf Yard',city:'Newcastle',type:'Build-to-rent',cat:'res',ltv:51,icr:1.94,occ:96,trend:0,amt:12.6,why:'—'},
+ {id:'CN-040',name:'St Anne\'s Student',city:'Nottingham',type:'Student',cat:'res',ltv:53,icr:1.87,occ:93,trend:-.01,amt:10.2,why:'—'}];
+const LIM={ltv:70,icr:1.5,occ:85};
+let state={f:'all',t:null,q:'',sort:'risk',dir:1,rate:0,val:0};
+function forecast(l){ // illustrative stress maths: rates squeeze rent cover, value falls push up LTV
+ const icr=Math.max(0,(l.icr+l.trend)*(1-state.rate*0.06)); const ltv=Math.min(95,l.ltv/(1-state.val/100));
+ const st=(icr<LIM.icr||ltv>=LIM.ltv||l.occ<80)?'action':(icr<1.72||ltv>=63||l.occ<88)?'watch':'ok';
+ const months=st=='ok'?null:Math.max(1,Math.round((l.mo||9)-state.rate*0.8-state.val*0.15));
+ return {icr,ltv,st,months};
+}
+const ST={action:['p-red','alert-triangle','Needs action',0],watch:['p-amb','eye','Watching',1],ok:['p-grn','check-circle-2','Healthy',2]};
+const COLS=[['name','Loan',''],['type','Type',''],['ltv','Loan-to-value','How much of the property\'s value is borrowed. The limit is 70%; higher means less cushion if prices fall.'],['icr','Rent cover','How many times rent covers the interest bill (ICR). The loan needs at least 1.50x.'],['occ','Occupied','Share of homes or space currently let.'],['risk','Next problem','Estimated months until a loan rule is broken, on today\'s trend.'],['st','Status','']];
+function head(){ $('#thead').innerHTML=COLS.map(([k,l,tip],i)=>{const s=state.sort==k;const ar=s?(state.dir>0?'ascending':'descending'):'none';
+ return `<th scope="col" aria-sort="${ar}" class="${i<2?'text-left':i==6?'text-left':'text-right'} font-medium h-10 ${i==0?'pl-4':''} ${i==6?'pl-6 pr-4':''}">
+ <button class="inline-flex items-center gap-1 h-7 px-1 rounded-md hover:text-ink ${s?'text-ink':''} ${tip?'tip':''}" onclick="sortBy('${k}')">${l}${tip?'<i data-lucide="info" class="w-3 h-3 opacity-60" aria-hidden="true"></i><span class="tt" role="tooltip">'+tip+'</span>':''}<i data-lucide="${s?(state.dir>0?'arrow-up':'arrow-down'):'arrow-up-down'}" class="w-3 h-3 ${s?'':'opacity-40'}" aria-hidden="true"></i></button></th>`}).join('')}
+function sortBy(k){ if(state.sort==k)state.dir*=-1;else{state.sort=k;state.dir=1} render() }
+let prevSt={};
+function render(flash){
+ head();
+ let L=LOANS.map(l=>({...l,f:forecast(l)}));
+ const counts={action:0,watch:0,ok:0};L.forEach(l=>counts[l.f.st]++);
+ let rows=L.filter(l=>(state.f=='all'||l.f.st==state.f)&&(!state.t||l.cat==state.t)&&(!state.q||(l.name+' '+l.city+' '+l.id).toLowerCase().includes(state.q)));
+ const key={name:l=>l.name,type:l=>l.type,ltv:l=>l.f.ltv,icr:l=>l.f.icr,occ:l=>l.occ,risk:l=>ST[l.f.st][3]*100+(l.f.months||99),st:l=>ST[l.f.st][3]};
+ rows.sort((a,b)=>{const x=key[state.sort](a),y=key[state.sort](b);return (x>y?1:x<y?-1:0)*state.dir});
+ $('#rows').innerHTML=rows.map(l=>{const[pc,ic,lab]=ST[l.f.st];const ch=flash&&prevSt[l.id]&&prevSt[l.id]!=l.f.st;
+ return `<tr tabindex="0" class="border-b border-line last:border-0 cursor-pointer ${ch?'flash':''}" onclick="openDrawer('${l.id}')" onkeydown="if(event.key==='Enter')openDrawer('${l.id}')" aria-label="${l.name}, ${lab}. Open summary">
+  <td class="pl-4 py-2"><div class="font-medium">${l.name}</div><div class="text-[12px] text-sub">${l.city} · <span class="tnum">${l.id}</span></div></td>
+  <td><span class="inline-flex items-center gap-1 text-[12px] text-sub"><i data-lucide="${l.cat=='res'?'home':'briefcase'}" class="w-3 h-3" aria-hidden="true"></i>${l.type}</span></td>
+  <td class="text-right tnum">${bar(l.f.ltv/LIM.ltv,l.f.ltv>=70?'#D92D20':l.f.ltv>=63?'#F79009':'#B7AF9F')}<span class="${l.f.ltv>=70?'text-red-t font-semibold':''}">${l.f.ltv.toFixed(0)}%</span></td>
+  <td class="text-right tnum ${l.f.icr<1.5?'text-red-t font-semibold':''}">${l.f.icr.toFixed(2)}x</td>
+  <td class="text-right tnum ${l.occ<85?'text-amb-t font-semibold':''}">${l.occ}%</td>
+  <td class="text-right tnum">${l.f.months?'in ~'+l.f.months+' mo':'<span class="text-sub">None in sight</span>'}</td>
+  <td class="pl-6 pr-4"><span class="pill ${pc}"><i data-lucide="${ic}" class="w-3 h-3" aria-hidden="true"></i>${lab}</span></td></tr>`}).join('');
+ L.forEach(l=>prevSt[l.id]=l.f.st);
+ $('#empty').classList.toggle('hidden',rows.length>0);
+ $('#count').textContent=`Showing ${rows.length} of ${LOANS.length} loans`;
+ $('#sortLabel').textContent=({name:'name',type:'type',ltv:'loan-to-value',icr:'rent cover',occ:'occupancy',risk:'most urgent first',st:'status'})[state.sort];
+ // KPIs
+ const exp=L.filter(l=>l.f.st!='ok').reduce((s,l)=>s+l.amt,0);
+ const K=[['Loans watched',12,'','9 homes · 3 commercial','#FFFFFF','#E6E1D8','layers'],['Need action',counts.action,'','Rule likely broken in < 6 months','#FEF3F2','#FECDCA','alert-triangle'],['Watching',counts.watch,'','Getting close to a limit','#FFFAEB','#FEDF89','eye'],['Money at risk',exp,'£','across flagged loans','#FFFFFF','#E6E1D8','pound-sterling']];
+ $('#kpis').innerHTML=K.map(([t,v,p,s,bg,bd,ic],i)=>`<div class="rise rounded-[14px] p-4 border bracket" style="background:${bg};border-color:${bd};animation-delay:${100+i*40}ms">
+  <div class="flex items-center gap-2 text-[13px] text-sub"><i data-lucide="${ic}" class="w-4 h-4" aria-hidden="true"></i>${t}</div>
+  <div class="serif text-[40px] leading-[44px] mt-2 tnum">${p}<span data-count="${v}">${p?v.toFixed(1):v}</span>${p?'m':''}</div>
+  <div class="text-[12px] text-sub">${s}</div></div>`).join('');
+ $('#stressMsg').innerHTML=`${state.rate||state.val?'With these shocks':'On today\'s trend'}: <b class="text-red-t">${counts.action} need action</b>, <b class="text-amb-t">${counts.watch} watching</b>, <b class="text-grn-t">${counts.ok} healthy</b>.`;
+ lucide.createIcons(); if(flash!==undefined)countUp();
+}
+const bar=(p,c)=>`<span class="inline-block align-middle mr-2 w-12 h-[6px] rounded-full bg-[#F0ECE5] overflow-hidden" aria-hidden="true"><span class="block h-full rounded-full" style="width:${Math.min(100,p*100)}%;background:${c};transition:width .5s"></span></span>`;
+function countUp(){ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ $$('.view.on [data-count]').forEach(el=>{const to=+el.dataset.count,dec=(to%1||el.previousSibling&&String(el.parentElement.textContent).includes('£'))?1:0,t0=performance.now();const f=n=>{const k=Math.min(1,(n-t0)/800),e=1-Math.pow(1-k,3);el.textContent=(to*e).toFixed(dec);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
+function setFilter(f){state.f=f;$$('#fStatus .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f==f));render()}
+function resetFilters(){state.q='';$('#q').value='';state.t=null;$$('#fType .chip').forEach(b=>b.setAttribute('aria-pressed','false'));setFilter('all')}
+$$('#fStatus .chip').forEach(b=>b.onclick=()=>setFilter(b.dataset.f));
+$$('#fType .chip').forEach(b=>b.onclick=()=>{state.t=state.t==b.dataset.f?null:b.dataset.f;$$('#fType .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.f==state.t));render()});
+$('#q').oninput=e=>{state.q=e.target.value.toLowerCase();render()};
+$('#rate').oninput=e=>{state.rate=+e.target.value;$('#rv').textContent='+'+state.rate.toFixed(1)+'%';render(true)};
+$('#val').oninput=e=>{state.val=+e.target.value;$('#vv').textContent=state.val+'%';render(true)};
+// ---------- Drawer ----------
+function openDrawer(id){const l=LOANS.find(x=>x.id==id),f=forecast(l),[pc,ic,lab]=ST[f.st];
+ $('#drawer').innerHTML=`<div class="flex items-center gap-2 px-6 h-14 border-b border-line"><span class="text-[12px] text-sub tnum">${l.id}</span><span class="pill ${pc}"><i data-lucide="${ic}" class="w-3 h-3" aria-hidden="true"></i>${lab}</span><button class="ml-auto btn btn-ghost !w-8 !px-0 justify-center" onclick="closeDrawer()" aria-label="Close summary"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button></div>
+ <div class="p-6 overflow-y-auto flex-1">
+  <p class="text-[13px] text-sub">${l.type} · ${l.city}</p><h2 id="d-title" class="serif text-[36px] leading-10 mt-1">${l.name}</h2>
+  <p class="text-[14px] text-sub mt-2">${f.st=='ok'?'All three loan rules have comfortable headroom.':'Main reason: '+l.why.toLowerCase()+'.'}</p>
+  <div class="mt-6 space-y-4">
+   ${meter('Rent covers interest',f.icr.toFixed(2)+'x','needs at least 1.50x',Math.min(1,f.icr/2.5),1.5/2.5,f.icr<1.5)}
+   ${meter('Loan-to-value',f.ltv.toFixed(0)+'%','must stay under 70%',f.ltv/100,.7,f.ltv>=70)}
+   ${meter('Homes / space let',l.occ+'%','must stay above 85%',l.occ/100,.85,l.occ<85)}
+  </div>
+  <div class="mt-6 rounded-xl bg-[#FAF8F4] border border-line p-4 text-[13px] space-y-2">
+   <div class="flex justify-between"><span class="text-sub">Loan amount</span><span class="tnum font-medium">£${l.amt}m</span></div>
+   <div class="flex justify-between"><span class="text-sub">Next problem</span><span class="tnum font-medium">${f.months?'in about '+f.months+' months':'none forecast'}</span></div>
+   <div class="flex justify-between"><span class="text-sub">Next covenant test</span><span class="tnum font-medium">31 Mar 2027</span></div>
+  </div>
+  <h3 class="text-[13px] font-semibold mt-6">Latest signals</h3>
+  <ul class="mt-2 space-y-2 text-[13px]">${f.st=='ok'?'<li class="text-sub">No warning signs in the last 30 days.</li>':`<li class="flex gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-red-t shrink-0" aria-hidden="true"></i>${l.why}<span class="ml-auto src">Cortile</span></li><li class="flex gap-2"><i data-lucide="trending-down" class="w-4 h-4 text-amb-t shrink-0" aria-hidden="true"></i>Nearby values down 3% this quarter<span class="ml-auto src">MSCI</span></li>`}</ul>
+ </div>
+ <div class="p-4 border-t border-line flex gap-2"><a href="#loan" onclick="closeDrawer()" class="btn btn-dark flex-1 justify-center">Open full evidence <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i></a><button class="btn btn-ghost">Pin</button></div>`;
+ lucide.createIcons();$('#drawer').classList.add('open');$('#scrim').classList.add('open');setTimeout(()=>$('#drawer button').focus(),50)}
+function meter(t,v,s,p,lp,bad){return `<div><div class="flex items-baseline justify-between text-[13px]"><span>${t}</span><span class="tnum font-semibold ${bad?'text-red-t':''}">${v}</span></div>
+ <div class="relative h-2 rounded-full bg-[#F0ECE5] mt-2"><div class="h-2 rounded-full" style="width:${p*100}%;background:${bad?'#D92D20':'#1E1D1A'}"></div><div class="absolute -top-1 h-4 w-[2px] bg-[#B7AF9F]" style="left:${lp*100}%"></div></div>
+ <div class="text-[12px] text-sub mt-1">${s}</div></div>`}
+function closeDrawer(){$('#drawer').classList.remove('open');$('#scrim').classList.remove('open')}
+addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#pop').classList.remove('open')}});
+// ---------- Loan detail ----------
+const GA=[['Rent covers interest','1.42x','by Mar · needs 1.50x',1.42/2.5,1.5/2.5,'red','How many times rental income covers the interest bill (ICR).'],
+ ['Loan-to-value','66–72%','estimate · limit 70%',.69,.70,'amb','Share of the building\'s value that is borrowed. Shown as a range because values are estimates.'],
+ ['Homes let','91%','limit 85% · fine',.91,.85,'grn','Share of the 214 homes with a tenant.']];
+$('#gauges').innerHTML=GA.map(([t,v,s,p,lp,c,tip],i)=>{const col={red:['#FEF3F2','#FECDCA','#D92D20','text-red-t'],amb:['#FFFAEB','#FEDF89','#F79009','text-amb-t'],grn:['#FFFFFF','#E6E1D8','#17B26A','text-grn-t']}[c];
+ return `<div class="rise rounded-[14px] border p-4" style="background:${col[0]};border-color:${col[1]};animation-delay:${100+i*40}ms">
+ <div class="flex items-center gap-1 text-[13px] text-sub"><span class="tip inline-flex items-center gap-1" tabindex="0">${t}<i data-lucide="info" class="w-3 h-3" aria-hidden="true"></i><span class="tt" role="tooltip">${tip}</span></span></div>
+ <div class="serif text-[36px] leading-10 mt-1 ${col[3]}">${v}</div>
+ <div class="relative h-2 rounded-full bg-white/80 border border-line mt-2">${c=='amb'?`<div class="absolute h-full rounded-full" style="left:66%;width:6%;background:repeating-linear-gradient(45deg,#F79009 0 3px,#FEDF89 3px 6px)"></div>`:`<div class="h-full rounded-full" style="width:${p*100}%;background:${col[2]}"></div>`}<div class="absolute -top-1 h-4 w-[2px] bg-ink" style="left:${lp*100}%"></div></div>
+ <div class="text-[12px] text-sub mt-2">${s}</div></div>`}).join('');
+// Flow graph: V7-style node cards + SVG curves
+const NODES=[
+ {id:'loan',col:0,row:1.5,kind:'Loan',t:'Riverside BTR',s:'£14.5m · 214 homes',hot:1},
+ {id:'bA',col:1,row:0,kind:'Building',t:'Block A',s:'bld_0041 · all checks fine'},
+ {id:'bB',col:1,row:1.5,kind:'Building',t:'Block B',s:'bld_0042',hot:1},
+ {id:'bC',col:1,row:3,kind:'Building',t:'Block C',s:'bld_0043',hot:1},
+ {id:'s1',col:2,row:0,kind:'Warning sign',t:'Arrears 6.8%',s:'up from 3.1% in June',hot:1},
+ {id:'s2',col:2,row:1,kind:'Warning sign',t:'Service costs +£212k',s:'over budget this year',hot:1},
+ {id:'s3',col:2,row:2,kind:'Warning sign',t:'Fire check 47d late',s:'EWS1 still pending',hot:1},
+ {id:'s4',col:2,row:3,kind:'Checked',t:'Lift & EICR',s:'in date'},
+ {id:'r1',col:3,row:0.5,kind:'Rule at risk',t:'Rent cover 1.42x',s:'needs 1.50x · Mar 2027',hot:1},
+ {id:'r2',col:3,row:2.5,kind:'Rule',t:'Loan-to-value',s:'66–72% · limit 70%',amb:1}];
+const EDGES=[['loan','bA'],['loan','bB',1],['loan','bC',1],['bB','s1',1],['bB','s2',1],['bC','s3',1],['bC','s4'],['bA','s4'],['s1','r1',1],['s2','r1',1],['s3','r2',2],['s4','r2']];
+function drawFlow(){const el=$('#flow'),W=el.clientWidth,H=el.clientHeight,NW=196,NH=64,xs=[24,(W-NW)*0.33,(W-NW)*0.66,W-NW-24],y=r=>32+r*((H-64-NH)/3);
+ const P={};NODES.forEach(n=>P[n.id]=[xs[n.col],y(n.row)]);
+ let svg=`<svg class="absolute inset-0" width="${W}" height="${H}" aria-hidden="true">`;
+ EDGES.forEach(([a,b,h])=>{const[x1,y1]=[P[a][0]+NW,P[a][1]+NH/2],[x2,y2]=[P[b][0],P[b][1]+NH/2],m=(x1+x2)/2;const d=`M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`;
+  svg+= h==1?`<path d="${d}" fill="none" stroke="#FECDCA" stroke-width="6"/><path d="${d}" fill="none" stroke="#D92D20" stroke-width="2" class="flowpath"/>`:h==2?`<path d="${d}" fill="none" stroke="#F79009" stroke-width="1.5" stroke-dasharray="4 4"/>`:`<path d="${d}" fill="none" stroke="#CFC8BB" stroke-width="1"/>`});
+ svg+='</svg>';
+ el.innerHTML=svg+NODES.map((n,i)=>{const[x,yy]=P[n.id];const hdr=n.hot?'background:#FEF3F2;color:#B42318;border-color:#FECDCA':n.amb?'background:#FFFAEB;color:#B54708;border-color:#FEDF89':'background:#F4F1EC;color:#5F5B53;border-color:#E6E1D8';
+ return `<div class="rise absolute rounded-xl border bg-white overflow-hidden ${n.hot||n.amb?'':'opacity-80'}" style="left:${x}px;top:${yy}px;width:${NW}px;height:${NH}px;border-color:${n.hot?'#FDA29B':'#E6E1D8'};box-shadow:${n.hot?'0 4px 16px -6px rgba(217,45,32,.35)':'0 1px 2px rgba(30,29,26,.05)'};animation-delay:${200+n.col*120}ms">
+  <div class="flex items-center gap-1 px-2 h-5 text-[11px] font-medium border-b" style="${hdr}">${n.kind}${n.hot?'<i data-lucide="alert-circle" class="w-3 h-3 ml-auto" aria-hidden="true"></i>':'<i data-lucide="check" class="w-3 h-3 ml-auto" aria-hidden="true"></i>'}</div>
+  <div class="px-2 pt-1 text-[13px] font-medium leading-5 truncate">${n.t}</div><div class="px-2 text-[11px] text-sub truncate">${n.s}</div></div>`}).join('');lucide.createIcons()}
+// Evidence
+const EV=[['Rent covers interest','1.42x','Below the 1.50x the loan needs','Loan agreement · p.14 cl.21.2','file-text','Clause 21.2 Interest Cover: "The Borrower shall ensure that Interest Cover in respect of each Test Date is not less than 150 per cent."','Synthetic loan agreement, extracted by V7 Go'],
+ ['Arrears','6.8%','Less rent collected each month','Cortile · bld_0042 · leases','database','29 of 214 leases more than 30 days in arrears. Total owed £96,400. Up from 3.1% in June.','Cortile synthetic dataset, pulled 19:04'],
+ ['Service-charge overspend','£212k','Costs the landlord can\'t pass on','Cortile · bld_0042 · ledger','receipt','Budget £1.18m, spent £1.39m year to date. Biggest lines: reactive repairs, insurance.','Cortile synthetic dataset'],
+ ['Fire risk assessment','47 days late','Can block refinancing','Cortile · bld_0043 · compliance','flame','FRA due 26 Sep 2026, not completed. EWS1 form requested 3 Aug, still pending.','Cortile synthetic dataset'],
+ ['Estimated value','£20.1–21.8m','Puts LTV at 66–72%','MSCI RCA · 6 comparable sales','line-chart','Six Manchester BTR sales in the last 18 months. Shown here only as a range; licensed data is not published.','MSCI Real Capital Analytics (licensed, private)'],
+ ['Gym operator news','Store closures','Small: 4% of income','News · Parallel search','newspaper','Regional gym chain announces closure of 9 sites (fictional example for the demo).','Parallel web search, 8 Nov 2026']];
+$('#evidence').innerHTML=EV.map(([f,v,w,s,ic],i)=>`<tr class="border-t border-line"><td class="px-4 h-12">${f}</td><td class="text-right tnum font-semibold ${i<4&&i!=2?'':''}">${v}</td><td class="pl-8 text-sub">${w}</td>
+ <td class="px-4"><button class="src" onclick="pop(event,${i})" aria-haspopup="dialog"><i data-lucide="${ic}" class="w-3 h-3" aria-hidden="true"></i>${s}</button></td></tr>`).join('');
+function pop(e,i){e.stopPropagation();const p=$('#pop'),r=e.currentTarget.getBoundingClientRect(),m=$('#main').getBoundingClientRect();const[f,v,,s,ic,quote,orig]=EV[i];
+ p.innerHTML=`<div class="flex items-center gap-2 text-[12px] text-sub"><i data-lucide="${ic}" class="w-4 h-4" aria-hidden="true"></i>${s}<button class="ml-auto btn !min-h-[24px] !px-1" onclick="$('#pop').classList.remove('open')" aria-label="Close preview"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button></div>
+ <p class="mt-2 text-[14px] leading-[22px]"><mark class="bg-[#FFF6CC] text-ink px-1 rounded">${quote}</mark></p><p class="mt-2 text-[12px] text-sub">${orig}</p>
+ <div class="mt-4 flex gap-2"><button class="btn btn-ghost !min-h-[28px] text-[13px]">Open source</button><button class="btn btn-ghost !min-h-[28px] text-[13px]">Flag as wrong</button></div>`;
+ lucide.createIcons();const sec=$('#v-loan').getBoundingClientRect();p.style.left=(r.right-sec.left-320)+'px';p.style.top=(r.top-sec.top-p.offsetHeight-8)+'px';$('#v-loan').style.position='relative';p.classList.add('open');requestAnimationFrame(()=>{p.style.top=(r.top-sec.top-p.offsetHeight-8)+'px'})}
+document.addEventListener('click',e=>{if(!e.target.closest('#pop'))$('#pop').classList.remove('open')});
+// Timeline (V7 workflow nodes stacked)
+const TL=[['Data','Data pulled','Canary','Cortile, MSCI, news and the loan agreement','19:04:12','6 s','database'],
+ ['Reasoning','Warning signs scored','Canary','9 signs found, 3 serious','19:04:18','2 s','activity'],
+ ['Calculation','Breach forecast','Rules engine (plain code)','Rent cover 1.42x vs 1.50x by March','19:04:20','<1 s','calculator'],
+ ['Writing','Memo drafted','Canary','6 claims, each with a source','19:04:21','19 s','file-pen-line'],
+ ['Writing','Borrower chase drafted','Canary','Draft only. Never sent automatically','19:04:40','12 s','mail'],
+ ['Human gate','Memo approved','Ibad Z.','1 correction saved to memory','19:07:52','3 min','user-check']];
+$('#timeline').innerHTML=TL.map(([k,t,o,d,tm,du,ic],i)=>`${i?'<li aria-hidden="true" class="w-px h-4 bg-[#CFC8BB]"></li>':''}<li class="rise w-full max-w-[520px] rounded-xl border bg-white overflow-hidden" style="border-color:${k=='Human gate'?'#ABEFC6':'#E6E1D8'};animation-delay:${120+i*70}ms">
+ <div class="flex items-center gap-2 px-4 h-6 text-[11px] font-medium border-b ${k=='Human gate'?'bg-grn-bg text-grn-t border-grn-bd':'bg-[#F4F1EC] text-sub border-line'}"><i data-lucide="${ic}" class="w-3 h-3" aria-hidden="true"></i>${k}<span class="ml-auto tnum">${tm}</span></div>
+ <div class="flex items-center gap-4 px-4 py-2"><span class="w-6 h-6 rounded-full grid place-items-center text-[11px] font-semibold ${o.startsWith('Ibad')?'bg-[#E9E3D7] text-ink':'bg-canary text-ink'}" aria-hidden="true">${o.startsWith('Ibad')?'IZ':'C'}</span>
+  <div class="min-w-0"><div class="text-[14px] font-medium">${t}</div><div class="text-[12px] text-sub truncate">${o} · ${d}</div></div>
+  <span class="ml-auto shrink-0 text-[12px] tnum text-sub">${du}</span><i data-lucide="check-circle-2" class="w-4 h-4 text-grn-t shrink-0" aria-label="Done"></i></div></li>`).join('');
+// ---------- Router ----------
+const ORDER=['today','loan','memo','log'],NAMES={today:'Today',loan:'Riverside BTR',memo:'Memo',log:'Activity'};
+function go(v){if(!ORDER.includes(v))v='today';$$('.view').forEach(s=>s.classList.toggle('on',s.id=='v-'+v));
+ $$('.nav a[data-v]').forEach(a=>a.toggleAttribute('aria-current',false));const a=$(`.nav a[data-v="${v}"]`);a&&a.setAttribute('aria-current','page');
+ $('#crumb').textContent=NAMES[v];const idx=ORDER.indexOf(v);
+ $$('#stepper .step').forEach((s,i)=>{s.classList.toggle('done',i<idx);s.toggleAttribute('aria-current',false);if(i==idx)s.setAttribute('aria-current','step');const n=s.querySelector('.sn');n.innerHTML=i<idx?'<i data-lucide="check" class="w-3 h-3"></i>':i+1});
+ $('#stepHint').textContent=['Step 1 of 4 · about 5 minutes','Step 2 of 4 · check each source','Step 3 of 4 · nothing is sent yet','Step 4 of 4 · chase stays a draft'][idx];
+ if(v=='loan')requestAnimationFrame(drawFlow);lucide.createIcons();countUp();$('#main').scrollTop=0}
+addEventListener('hashchange',()=>go(location.hash.slice(1)));
+render();go(location.hash.slice(1)||'today');
+// screenshot helpers
+const qp=new URLSearchParams(location.search);if(qp.get('filter')){setFilter(qp.get('filter'))}if(qp.get('type')){$(`#fType [data-f="${qp.get('type')}"]`).click()}if(qp.get('drawer'))setTimeout(()=>openDrawer(qp.get('drawer')),700);
+</script>
+<style>.fnref{font-size:11px;vertical-align:super;margin-left:2px;color:#7A5A00;font-weight:600;text-decoration:none;padding:0 2px;border-radius:4px}.fnref:hover{background:#FFF6CC}
+#toast{animation:toast 4s var(--ease) both}@keyframes toast{0%{opacity:0;transform:translateY(16px)}10%,85%{opacity:1;transform:none}100%{opacity:0}}</style>
+</body></html>

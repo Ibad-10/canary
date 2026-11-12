@@ -1,0 +1,41 @@
+[
+ {
+  "id": 1,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": null,
+  "kind": "memo",
+  "title": "Watchlist memo: 2 red loans",
+  "body_md": "> **Recommendation:** move Riverside BTR and Quayside Offices to the red watchlist, and request an updated rent roll from Riverside.\n\n## In short\nRent at Riverside BTR is forecast to cover interest only **1.38 times** by May 2027, below the **1.50 times** the loan requires[^1]. Arrears have climbed to **6.8%** of the rent roll[^2] and service costs are **GBP 212k** over budget this year[^3]. Quayside Offices' loan-to-value is drifting from 66.5% towards **74.5%** against a 70% limit[^4].\n\n## What changed\n- Block C's fire risk assessment is **47 days overdue** and its cladding form (EWS1) is still pending[^5]. Lenders may struggle to refinance until this is fixed.\n- Recent nearby sales put Riverside's value at **GBP 20.1m - 21.8m**[^6], so the loan is 66-72% of value against a 70% limit.\n- Leeds office values fell **4.1%** in twelve months[^7] and 22% of Quayside's space is empty.\n- The ground-floor gym operator at Riverside announced closures elsewhere[^8]. It is a small part of income.\n\n## Next steps\n1. Ask the Riverside borrower for the rent roll and arrears ageing (draft ready, not sent).\n2. Order a desktop valuation for Quayside Offices before the next test.\n3. Add both loans to the next credit committee.\n\n[^1]: Loan agreement FA-BTR-014.pdf, page 14, clause 21.2 (synthetic) · Canary forecast\n[^2]: Cortile · lease_arrears · rows 4211, 4212, 4219, 4230\n[^3]: Cortile · service_charge_ledger · rows 880-882\n[^4]: Canary forecast, loan L-031 · Sample market trend (illustrative) derived figure\n[^5]: Cortile · compliance_items 3301 and ews_forms 77\n[^6]: Sample market trend (illustrative) derived range (licensed, raw rows not shown)\n[^7]: Sample market trend (illustrative) derived figure\n[^8]: News via Parallel search, 8 Nov 2026\n",
+  "model": "grok-sample",
+  "status": "draft",
+  "decided_by": null,
+  "decided_at": null,
+  "note": null
+ },
+ {
+  "id": 2,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-014",
+  "kind": "chase",
+  "title": "Chase: Riverside BTR rent roll",
+  "body_md": "Hi Sam, ahead of the March covenant test, could you share the current rent roll and arrears ageing for Riverside Blocks A-C by 19 Nov? Thanks, Priya",
+  "model": "grok-sample",
+  "status": "draft",
+  "decided_by": null,
+  "decided_at": null,
+  "note": null
+ },
+ {
+  "id": 3,
+  "run_id": "run_2026-11-12_sample",
+  "loan_id": "L-031",
+  "kind": "chase",
+  "title": "Chase: Quayside Offices tenancy schedule",
+  "body_md": "Hi Alex, could you send the current tenancy schedule and the missing EICR certificate for floors 4-6 of Quayside Offices by 20 Nov? We are also asking for a desktop valuation. Thanks, Tom",
+  "model": "grok-sample",
+  "status": "draft",
+  "decided_by": null,
+  "decided_at": null,
+  "note": null
+ }
+]

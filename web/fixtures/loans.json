@@ -1,0 +1,314 @@
+[
+ {
+  "id": "L-014",
+  "name": "Riverside BTR",
+  "borrower": "Riverside Living Ltd",
+  "sector": "BTR",
+  "owner": "Priya Shah",
+  "amount_gbp": 14500000,
+  "rate_pct": 6.1,
+  "value_gbp": 22000000,
+  "covenants": {
+   "icr_min": 1.5,
+   "icr_cash_trap": 1.55,
+   "ltv_max": 70,
+   "ltv_cash_trap": 68,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_200"
+  ],
+  "building_ids": [
+   "bld_0041",
+   "bld_0042",
+   "bld_0043"
+  ],
+  "contract_file": "FA-BTR-014.pdf",
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Manchester."
+ },
+ {
+  "id": "L-031",
+  "name": "Quayside Offices",
+  "borrower": "Quayside Estates plc",
+  "sector": "Office",
+  "owner": "Tom Hale",
+  "amount_gbp": 11200000,
+  "rate_pct": 6.4,
+  "value_gbp": 16800000,
+  "covenants": {
+   "icr_min": 1.35,
+   "icr_cash_trap": 1.45,
+   "ltv_max": 70,
+   "ltv_cash_trap": 68,
+   "occupancy_min": 70,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_201"
+  ],
+  "building_ids": [
+   "bld_0088"
+  ],
+  "contract_file": "FA-OFF-031.pdf",
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Leeds."
+ },
+ {
+  "id": "L-022",
+  "name": "Canal Street Student",
+  "borrower": "Canal Street PBSA LLP",
+  "sector": "PBSA",
+  "owner": "Priya Shah",
+  "amount_gbp": 9800000,
+  "rate_pct": 6,
+  "value_gbp": 16900000,
+  "covenants": {
+   "icr_min": 1.4,
+   "icr_cash_trap": 1.55,
+   "ltv_max": 65,
+   "ltv_cash_trap": 62,
+   "occupancy_min": 80,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_202"
+  ],
+  "building_ids": [
+   "bld_0061",
+   "bld_0062"
+  ],
+  "contract_file": null,
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Birmingham."
+ },
+ {
+  "id": "L-007",
+  "name": "Hartley Court",
+  "borrower": "Hartley Block Holdings",
+  "sector": "BTL",
+  "owner": "Maya Okafor",
+  "amount_gbp": 6100000,
+  "rate_pct": 5.9,
+  "value_gbp": 11100000,
+  "covenants": {
+   "icr_min": 1.25,
+   "icr_cash_trap": 1.4,
+   "ltv_max": 75,
+   "ltv_cash_trap": 65,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_203"
+  ],
+  "building_ids": [
+   "bld_0023"
+  ],
+  "contract_file": null,
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Bristol."
+ },
+ {
+  "id": "L-019",
+  "name": "Market Row",
+  "borrower": "Market Row Retail Ltd",
+  "sector": "Retail",
+  "owner": "Tom Hale",
+  "amount_gbp": 7400000,
+  "rate_pct": 6.5,
+  "value_gbp": 12900000,
+  "covenants": {
+   "icr_min": 1.3,
+   "icr_cash_trap": 1.4,
+   "ltv_max": 65,
+   "ltv_cash_trap": 62,
+   "occupancy_min": 80,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_204"
+  ],
+  "building_ids": [
+   "bld_0095"
+  ],
+  "contract_file": "FA-RET-019.pdf",
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Sheffield."
+ },
+ {
+  "id": "L-003",
+  "name": "Aldgate Lofts",
+  "borrower": "Aldgate Living Ltd",
+  "sector": "BTR",
+  "owner": "Maya Okafor",
+  "amount_gbp": 21000000,
+  "rate_pct": 5.8,
+  "value_gbp": 40400000,
+  "covenants": {
+   "icr_min": 1.5,
+   "icr_cash_trap": 1.6,
+   "ltv_max": 65,
+   "ltv_cash_trap": 60,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_205"
+  ],
+  "building_ids": [
+   "bld_0005",
+   "bld_0006"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in London."
+ },
+ {
+  "id": "L-011",
+  "name": "Ferry Lane Student",
+  "borrower": "Ferry Lane PBSA Ltd",
+  "sector": "PBSA",
+  "owner": "Priya Shah",
+  "amount_gbp": 8300000.000000001,
+  "rate_pct": 5.9,
+  "value_gbp": 16900000,
+  "covenants": {
+   "icr_min": 1.4,
+   "icr_cash_trap": 1.55,
+   "ltv_max": 65,
+   "ltv_cash_trap": 62,
+   "occupancy_min": 80,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_206"
+  ],
+  "building_ids": [
+   "bld_0071"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Glasgow."
+ },
+ {
+  "id": "L-025",
+  "name": "Kingsway",
+  "borrower": "Kingsway BTR Ltd",
+  "sector": "BTR",
+  "owner": "Maya Okafor",
+  "amount_gbp": 16700000,
+  "rate_pct": 6,
+  "value_gbp": 30900000,
+  "covenants": {
+   "icr_min": 1.5,
+   "icr_cash_trap": 1.6,
+   "ltv_max": 65,
+   "ltv_cash_trap": 60,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_207"
+  ],
+  "building_ids": [
+   "bld_0033",
+   "bld_0034"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Liverpool."
+ },
+ {
+  "id": "L-028",
+  "name": "Elm Park",
+  "borrower": "Elm Park Residential",
+  "sector": "BTL",
+  "owner": "Tom Hale",
+  "amount_gbp": 4900000,
+  "rate_pct": 5.7,
+  "value_gbp": 10400000,
+  "covenants": {
+   "icr_min": 1.25,
+   "icr_cash_trap": 1.4,
+   "ltv_max": 75,
+   "ltv_cash_trap": 65,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_208"
+  ],
+  "building_ids": [
+   "bld_0012"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Leicester."
+ },
+ {
+  "id": "L-033",
+  "name": "Northgate House",
+  "borrower": "Northgate Offices Ltd",
+  "sector": "Logistics",
+  "owner": "Priya Shah",
+  "amount_gbp": 18900000,
+  "rate_pct": 6.2,
+  "value_gbp": 37800000,
+  "covenants": {
+   "icr_min": 1.35,
+   "icr_cash_trap": 1.45,
+   "ltv_max": 65,
+   "ltv_cash_trap": 60,
+   "occupancy_min": 80,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_209"
+  ],
+  "building_ids": [
+   "bld_0102"
+  ],
+  "contract_file": "FA-LOG-033.pdf",
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Cambridge."
+ },
+ {
+  "id": "L-036",
+  "name": "Wharf Yard",
+  "borrower": "Wharf Yard BTR LLP",
+  "sector": "BTR",
+  "owner": "Maya Okafor",
+  "amount_gbp": 12600000,
+  "rate_pct": 5.9,
+  "value_gbp": 24700000,
+  "covenants": {
+   "icr_min": 1.5,
+   "icr_cash_trap": 1.6,
+   "ltv_max": 65,
+   "ltv_cash_trap": 60,
+   "occupancy_min": 85,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_210"
+  ],
+  "building_ids": [
+   "bld_0044",
+   "bld_0045"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Newcastle."
+ },
+ {
+  "id": "L-040",
+  "name": "St Anne's Student",
+  "borrower": "St Anne's PBSA Ltd",
+  "sector": "PBSA",
+  "owner": "Tom Hale",
+  "amount_gbp": 10200000,
+  "rate_pct": 6.1,
+  "value_gbp": 19200000,
+  "covenants": {
+   "icr_min": 1.4,
+   "icr_cash_trap": 1.55,
+   "ltv_max": 65,
+   "ltv_cash_trap": 62,
+   "occupancy_min": 80,
+   "test": "ICR"
+  },
+  "development_ids": [
+   "dev_211"
+  ],
+  "building_ids": [
+   "bld_0081"
+  ],
+  "synthetic_note": "Synthetic loan terms on a real Cortile development in Nottingham."
+ }
+]
