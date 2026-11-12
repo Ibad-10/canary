@@ -34,12 +34,12 @@ export default async function SummaryPage() {
         {STATUS_ORDER.map((s) => {
           const c = STATUS_COLOR[s];
           return (
-            <Link key={s} href={`/desk/dashboard?status=${s}`} className="group rounded-2xl border p-5 transition-shadow hover:shadow-md" style={{ background: c.bg, borderColor: c.bd }}>
+            <Link key={s} href={`/desk/dashboard?status=${s}`} className="group min-w-0 rounded-2xl border p-4 sm:p-5 transition-shadow hover:shadow-md" style={{ background: c.bg, borderColor: c.bd }}>
               <div className="flex items-center gap-2 text-[14px] font-medium" style={{ color: c.text }}>
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: c.dot }} aria-hidden="true" />{STATUS_NAME[s]}
                 <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
               </div>
-              <div className="serif text-[88px] leading-[88px] mt-3 tnum" style={{ color: c.text }}>{counts[s]}</div>
+              <div className="serif text-[56px] leading-[60px] lg:text-[88px] lg:leading-[88px] mt-3 tnum" style={{ color: c.text }}>{counts[s]}</div>
               <div className="text-[13px] mt-2" style={{ color: c.text }}>{counts[s] ? `${gbp(exposure(s))} of loans` : "No loans"}</div>
               <p className="text-[12px] text-sub mt-1 max-w-[260px]">{STATUS_HINT[s]}</p>
             </Link>
@@ -78,7 +78,7 @@ export default async function SummaryPage() {
         )}
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-labelledby="h-chg" className="card p-5">
           <h2 id="h-chg" className="text-[18px] font-semibold flex items-center gap-2"><Newspaper className="w-4 h-4" aria-hidden="true" />What changed</h2>
           {news.length === 0 ? (
