@@ -137,7 +137,7 @@ def build_names(m: dict, loans: list[dict]) -> dict[str, str]:
 
 
 def make_text_scrubber(names: dict[str, str], ids: dict[str, str], salt: str):
-    # Longest first so "Rowan BTR Holdings Ltd" wins over "Rowan".
+    # Longest first so "<stem> BTR Holdings Ltd" wins over "<stem>".
     keys = sorted(names, key=len, reverse=True)
     name_re = re.compile(r"\b(" + "|".join(re.escape(k) for k in keys) + r")\b") if keys else None
 
