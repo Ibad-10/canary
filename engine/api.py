@@ -1,19 +1,49 @@
 """FastAPI: POST /run, GET /stress, POST /corrections.  Run: uvicorn engine.api:app --port 8000"""
+import hmac
 import json
 import os
 import subprocess
 import sys
+import time
+from contextlib import contextmanager
 from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 LATEST = ROOT / "engine" / "out" / "latest"
+LOCK = ROOT / "engine" / "out" / ".pipeline.lock"
+
+
+def require_token(x_canary_token: str | None = Header(default=None)):
+    expected = os.getenv("CANARY_API_TOKEN")
+    if not expected:
+        raise HTTPException(503, "CANARY_API_TOKEN is not set on the engine; write endpoints are disabled")
+    if not x_canary_token or not hmac.compare_digest(x_canary_token, expected):
+        raise HTTPException(401, "missing or wrong X-Canary-Token header")
+
+
+@contextmanager
+def pipeline_lock():
+    """Cross-process lock: O_EXCL create fails if another run holds it. Stale locks (>20 min) are taken over."""
+    LOCK.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if LOCK.exists() and time.time() - LOCK.stat().st_mtime > 1200:
+            LOCK.unlink()
+        fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        raise HTTPException(409, "a pipeline run is already in progress")
+    try:
+        os.write(fd, str(os.getpid()).encode())
+        os.close(fd)
+        yield
+    finally:
+        LOCK.unlink(missing_ok=True)
 
 app = FastAPI(title="Canary engine API")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -25,14 +55,15 @@ def health():
     return {"ok": True}
 
 
-@app.post("/run")
+@app.post("/run", dependencies=[Depends(require_token)])
 def run(backtest: bool = False):
     """Runs the pipeline to completion (blocking, a few minutes at most) and returns the live run id."""
     cmd = [sys.executable, "-m", "engine.pipeline"] + (["--backtest"] if backtest else [])
-    try:
-        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=900)
-    except subprocess.TimeoutExpired:
-        raise HTTPException(504, "pipeline timed out")
+    with pipeline_lock():
+        try:
+            p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=900)
+        except subprocess.TimeoutExpired:
+            raise HTTPException(504, "pipeline timed out")
     if p.returncode != 0:
         raise HTTPException(500, {"error": "pipeline failed", "stderr": p.stderr[-800:]})
     try:
@@ -70,7 +101,7 @@ class Correction(BaseModel):
     author: str = "analyst"
 
 
-@app.post("/corrections")
+@app.post("/corrections", dependencies=[Depends(require_token)])
 def corrections(c: Correction):
     res, ok = {}, 0
     try:
