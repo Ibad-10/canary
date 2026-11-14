@@ -99,7 +99,7 @@ export function humanise(s: string): string {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-/** "Rowan Works, Birmingham - build-to-rent block" -> "Rowan Works, Birmingham". */
+/** "CAN-003, Birmingham - build-to-rent block" -> "CAN-003, Birmingham". */
 export const loanTitle = (l: Pick<Loan, "name">) => l.name.split(" - ")[0];
 export const loanCity = (l: Pick<Loan, "name">) => loanTitle(l).split(",")[1]?.trim() ?? "";
 export const loanSite = (l: Pick<Loan, "name">) => loanTitle(l).split(",")[0];

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, useSpring } from "motion/react";
-import { Brain, Building2, CheckCircle2, Clock, FileSearch, FileText, LineChart, ListChecks, Newspaper, PenLine, Search, TrendingUp, UserCheck, type LucideIcon } from "lucide-react";
+import { Brain, Building2, CheckCircle2, Clock, FileSearch, FileText, LineChart, ListChecks, Newspaper, PenLine, Search, UserCheck, type LucideIcon } from "lucide-react";
 import { EASE, SectionHead, type LandingData } from "./primitives";
 
 type Stage = { match: RegExp; partner: string; caption: string; Icon: LucideIcon };
@@ -11,7 +11,6 @@ const STAGES: Stage[] = [
   { match: /covenant.*extract|extract/i, partner: "V7 Go", caption: "Reads each facility agreement and pulls the covenants.", Icon: FileText },
   { match: /cortile|signal/i, partner: "Cortile", caption: "Arrears, repairs, compliance and service charge per building.", Icon: Building2 },
   { match: /comps/i, partner: "Listings and auctions", caption: "Rent and sale comparables near each asset.", Icon: Search },
-  { match: /market/i, partner: "MSCI RCA", caption: "Market value trend for the sector and city.", Icon: TrendingUp },
   { match: /news/i, partner: "Parallel", caption: "Live news on the borrower and the building.", Icon: Newspaper },
   { match: /correction|recall/i, partner: "cognee", caption: "Recalls what analysts corrected last time.", Icon: Brain },
   { match: /forecast/i, partner: "Canary", caption: "Forecasts ICR and LTV 3 and 6 months ahead, with a range.", Icon: LineChart },
@@ -19,7 +18,7 @@ const STAGES: Stage[] = [
   { match: /memo|draft/i, partner: "Grok", caption: "Drafts the watchlist memo, every line cited.", Icon: PenLine },
   { match: /sign-off|await|approve/i, partner: "You", caption: "Approve, edit or dismiss. Nothing goes out without you.", Icon: UserCheck },
 ];
-const ORDER = [1, 0, 2, 3, 4, 5, 6, 8, 7, 9, 10];
+const ORDER = [1, 0, 2, 3, 4, 5, 7, 6, 8, 9];
 const stageFor = (name: string) => STAGES[ORDER.find((i) => STAGES[i].match.test(name)) ?? 0];
 const STEP_STATUS: Record<string, string> = { done: "Done", fallback: "Backup used", failed: "Failed", waiting: "Waiting for you" };
 

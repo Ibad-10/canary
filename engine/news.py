@@ -72,7 +72,7 @@ def _city(loan: dict) -> str:
     for k in ("city", "region"):
         if loan.get(k):
             return str(loan[k])
-    m = re.search(r",\s*([^,]+?)\s+-\s", loan.get("name") or "")  # "Rowan Works, Birmingham - build-to-rent block"
+    m = re.search(r",\s*([^,]+?)\s+-\s", loan.get("name") or "")  # e.g. "CAN-003, Birmingham - build-to-rent block"
     return m.group(1) if m else ""
 
 
