@@ -12,6 +12,8 @@ It spots loan rules at risk between quarterly reports, with proof from the build
 
 Built in one day at the Grok Bot Real Estate Hackathon, 12 November 2026. Track 1: workflows (lending deal to draft memo).
 
+<p align="center"><a href="docs/media/canary-demo-v2.mp4"><img src="docs/media/canary-demo-preview.gif" width="720" alt="Canary demo preview"></a><br/><a href="docs/media/canary-demo-v2.mp4">▶ Watch the full 2-minute demo with sound</a> · <a href="https://github.com/Ibad-10/canary/raw/main/docs/media/canary-demo-v2.mp4">Download mp4</a></p>
+
 ---
 
 ## The problem
@@ -289,7 +291,7 @@ Tests: `python -m engine.test_forecast` (checks the worked example in `LOAN_RULE
 
 ## Demo
 
-The 2-minute video script is in [`docs/DEMO.md`](docs/DEMO.md). The video is uploaded with our hackathon submission. It shows:
+The 2-minute video script is in [`docs/DEMO.md`](docs/DEMO.md). [Watch the full demo with sound](docs/media/canary-demo-v2.mp4) or [download the mp4](https://github.com/Ibad-10/canary/raw/main/docs/media/canary-demo-v2.mp4). It shows:
 
 1. The landing page and the problem, then sign-in.
 2. The summary: 4 red, 2 amber, 6 green.
