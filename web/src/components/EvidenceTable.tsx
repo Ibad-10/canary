@@ -33,7 +33,7 @@ function sourceFacts(source: Source): [string, string][] {
   return out;
 }
 
-export default function EvidenceTable({ loanId, persist, forecast, signals, evidence }: { loanId: string; persist: boolean; forecast: Forecast; signals: Signal[]; evidence: Evidence[] }) {
+export default function EvidenceTable({ loanId, persist, readOnly = false, forecast, signals, evidence }: { loanId: string; persist: boolean; readOnly?: boolean; forecast: Forecast; signals: Signal[]; evidence: Evidence[] }) {
   const [open, setOpen] = useState<Row | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -138,10 +138,12 @@ export default function EvidenceTable({ loanId, persist, forecast, signals, evid
               </dl>
               {link && <a className="btn btn-ghost mt-3" href={link} target="_blank" rel="noreferrer"><Globe className="w-4 h-4" aria-hidden="true" />Open link</a>}
               <label htmlFor="flag-note" className="text-[12px] font-semibold mt-6 block text-sub">Something wrong? Tell Canary</label>
-              <textarea id="flag-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="e.g. The gym is 4% of income, not 18%." className="mt-2 w-full rounded-xl border border-line bg-white p-3 text-[13px]" />
+              <textarea id="flag-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} disabled={readOnly} placeholder={readOnly ? "Read-only public demo" : "e.g. The gym is 4% of income, not 18%."} className="mt-2 w-full rounded-xl border border-line bg-white p-3 text-[13px]" />
             </div>
             <div className="p-4 border-t border-line flex gap-2">
-              <button className="btn btn-dark flex-1 justify-center" onClick={flag} disabled={busy}><Flag className="w-4 h-4" aria-hidden="true" />Flag as wrong</button>
+              <span className="flex-1 flex" title={readOnly ? "Read-only public demo" : undefined}>
+                <button className="btn btn-dark flex-1 justify-center" onClick={flag} disabled={busy || readOnly}><Flag className="w-4 h-4" aria-hidden="true" />Flag as wrong</button>
+              </span>
               <button className="btn btn-ghost" onClick={() => setOpen(null)}>Close</button>
             </div>
           </>

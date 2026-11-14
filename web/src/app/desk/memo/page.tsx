@@ -99,7 +99,7 @@ export default async function MemoPage() {
         )}
       </div>
       <div className="flex flex-col gap-4 self-start xl:sticky xl:top-20">
-        <MemoDecision persist={b.source !== "fixture"} draftId={memo.id} runId={b.run.id} status={memo.status} decidedBy={memo.decided_by} decidedAt={memo.decided_at} nextSeq={nextSeq} />
+        <MemoDecision persist={b.source !== "fixture"} readOnly={b.source === "demo"} draftId={memo.id} runId={b.run.id} status={memo.status} decidedBy={memo.decided_by} decidedAt={memo.decided_at} nextSeq={nextSeq} />
         <div className="card p-4 text-[12px] text-sub leading-5">
           Every number in the memo is quoted from the forecast. The language model writes the words only.
         </div>

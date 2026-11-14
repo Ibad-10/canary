@@ -174,7 +174,7 @@ Next.js App Router, TypeScript, Tailwind 4, shadcn/ui, Motion, recharts, `react-
 | `/desk/memo` | Watchlist memo and chase letters, approve or dismiss |
 | `/desk/log` | Who did what and when, plus the backtest score |
 
-Reading data (`web/src/lib/data.ts`): Supabase with the anon key, else `web/public/data/*.json` from the engine, else `web/fixtures/*.json` (synthetic sample, shown with a "Sample data" label).
+Reading data (`web/src/lib/data.ts`): Supabase with the anon key, else `web/public/data/*.json` from the engine, else `web/fixtures/*.json` (synthetic sample, shown with a "Sample data" label). With `CANARY_DATA=demo` it reads only `web/demo-data/*.json` (see section 10).
 
 Writing from the browser: approve or dismiss updates `drafts` and adds a `steps` row. "Flag as wrong" and "not a concern" insert into `corrections`.
 
@@ -202,3 +202,16 @@ Auth: Clerk protects `/desk` when `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is set. Wi
 - Engine key names are in `.env.example`. Values are never committed.
 - `.env`, `data/`, `msci_private/`, `engine/out/` and `engine/cache/` are git-ignored.
 - MSCI data is used in-app only and deleted after judging. Cortile data is for attendees of this event only.
+
+## 10. Public demo (Vercel)
+
+The public site never talks to Supabase (it holds MSCI rows). It reads a sanitised snapshot instead: production has `CANARY_DATA=demo` and no Supabase variables, so `data.ts` loads `web/demo-data/*.json`, the header pill says "Real run, anonymised" and sign-off, dismiss and "flag as wrong" are disabled.
+
+`engine/publish.py` builds the snapshot from `engine/out/latest/`: it drops MSCI evidence rows and market drivers, replaces MSCI/RCA and Cortile mentions in text, swaps loan, borrower and building names, addresses and postcodes for stable pseudonyms, and hashes source row ids. The mapping and its salt stay in `engine/cache/publish_map.json` (git-ignored, not deployed). A leak check fails the run if any original name, id, postcode, "MSCI", "RCA" or "Cortile" survives.
+
+`web/demo-data/` is git-ignored but not in `web/.vercelignore`, so the CLI uploads it. Redeploy after a new run:
+
+```powershell
+cd D:\canary-hack; python -m engine.publish
+cd web; vercel deploy --prod --yes
+```

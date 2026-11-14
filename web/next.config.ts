@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/**": ["./demo-data/*.json", "./fixtures/*.json"],
+  },
   turbopack: {
     rules: {
       "*.css": {

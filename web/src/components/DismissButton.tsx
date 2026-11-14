@@ -4,7 +4,7 @@ import { writeRow } from "@/lib/supabase";
 import { useToast } from "./Toast";
 import { useAuthor } from "@/lib/useAuthor";
 
-export default function DismissButton({ loanId, signalKind, persist }: { loanId: string; signalKind: string; persist: boolean }) {
+export default function DismissButton({ loanId, signalKind, persist, readOnly = false }: { loanId: string; signalKind: string; persist: boolean; readOnly?: boolean }) {
   const [done, setDone] = useState(false);
   const { toast, show } = useToast();
   const author = useAuthor();
@@ -15,9 +15,11 @@ export default function DismissButton({ loanId, signalKind, persist }: { loanId:
   }
   return (
     <>
-      <button onClick={go} disabled={done} className="btn btn-ghost justify-center w-full">
-        {done ? "Dismissed - Canary will remember" : "Not a concern - dismiss"}
-      </button>
+      <span className="block" title={readOnly ? "Read-only public demo" : undefined}>
+        <button onClick={go} disabled={done || readOnly} className="btn btn-ghost justify-center w-full">
+          {done ? "Dismissed - Canary will remember" : "Not a concern - dismiss"}
+        </button>
+      </span>
       {toast}
     </>
   );

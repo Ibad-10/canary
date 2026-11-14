@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 
-const SOURCE: Record<string, string> = { supabase: "Live database", files: "Engine output", fixture: "Sample data" };
+const SOURCE: Record<string, string> = { supabase: "Live database", files: "Engine output", fixture: "Sample data", demo: "Real run, anonymised" };
 
 export default async function DeskLayout({ children }: { children: React.ReactNode }) {
   const b = await getBundle();
@@ -25,7 +25,7 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
           <SidebarTrigger aria-label="Toggle navigation" />
           <Separator orientation="vertical" className="h-5" />
           <span className="text-[13px] text-sub">Checked {shortDate(b.run.as_of)}</span>
-          <span className={`pill ${b.source === "fixture" ? "p-gold" : "p-neutral"}`} title="Where this screen reads its data from">
+          <span className={`pill ${b.source === "fixture" ? "p-gold" : "p-neutral"}`} title={b.source === "demo" ? "A real Canary run with names, addresses and source ids replaced, and licensed market data removed. Read-only." : "Where this screen reads its data from"}>
             <FlaskConical className="w-3 h-3" aria-hidden="true" />{SOURCE[b.source] ?? b.source}
           </span>
           <div className="ml-auto flex items-center gap-3">

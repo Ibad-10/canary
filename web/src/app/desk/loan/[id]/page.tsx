@@ -119,7 +119,7 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
           <p className="text-[13px] text-sub mt-1">{f.status === "red" ? "Move to the red watchlist and ask the borrower for an update." : f.status === "amber" ? "Keep on the watchlist. It is heading for a cash-trap level." : "No action needed. Canary keeps watching."}</p>
           <div className="mt-3 flex flex-col gap-2">
             <Link href={`/desk/memo/${loan.id}`} className="btn btn-dark justify-center"><FileText className="w-4 h-4" aria-hidden="true" />Review the memo</Link>
-            <DismissButton persist={b.source !== "fixture"} loanId={loan.id} signalKind={dismissKind} />
+            <DismissButton persist={b.source !== "fixture"} readOnly={b.source === "demo"} loanId={loan.id} signalKind={dismissKind} />
           </div>
           {chase && <p className="text-[12px] text-sub mt-3 flex items-center gap-1.5"><Mail className="w-3 h-3" aria-hidden="true" />Borrower letter drafted, not sent.</p>}
         </section>
@@ -164,7 +164,7 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
     </div>
   );
 
-  const evidenceTab = <EvidenceTable persist={b.source !== "fixture"} loanId={loan.id} forecast={f} signals={signals} evidence={evidence.filter((e) => e.kind !== "news")} />;
+  const evidenceTab = <EvidenceTable persist={b.source !== "fixture"} readOnly={b.source === "demo"} loanId={loan.id} forecast={f} signals={signals} evidence={evidence.filter((e) => e.kind !== "news")} />;
 
   const newsTab = news.length === 0 ? (
     <p className="card p-6 text-[14px] text-sub">No news has been found for this borrower or area.</p>

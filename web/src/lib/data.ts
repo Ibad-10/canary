@@ -100,10 +100,15 @@ async function fromFiles(dir: string, source: Bundle["source"]): Promise<Bundle 
   } as unknown as Bundle;
 }
 
-/** Supabase -> public/data/*.json (engine output) -> fixtures/*.json (sample). */
+/**
+ * Supabase -> public/data/*.json (engine output) -> fixtures/*.json (sample).
+ * CANARY_DATA=demo (public site): demo-data/*.json from `python -m engine.publish` only, never Supabase.
+ */
 export const getBundle = cache(async (): Promise<Bundle> => {
-  const b =
-    (await fromSupabase()) ??
+  const demo = process.env.CANARY_DATA === "demo";
+  const b = demo
+    ? (await fromFiles("demo-data", "demo")) ?? (await fromFiles("fixtures", "fixture"))
+    : (await fromSupabase()) ??
     (await fromFiles("public/data", "files")) ??
     (await fromFiles("fixtures", "fixture"));
   if (!b) throw new Error("No data: Supabase, public/data and fixtures all empty");

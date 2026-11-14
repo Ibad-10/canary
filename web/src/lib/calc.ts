@@ -140,7 +140,7 @@ export function sourceLabel(source: Record<string, unknown> | null | undefined, 
   const s = (source ?? {}) as Record<string, unknown>;
   const n = (k: string) => (Array.isArray(s[k]) ? (s[k] as unknown[]).length : 0);
   if (label === "MSCI RCA" || s.label === "MSCI RCA") return { text: "MSCI RCA", kind: "msci" };
-  if (s.dataset === "cortile") return { text: `Cortile · ${s.table ?? "data"} · ${n("row_ids")} row${n("row_ids") === 1 ? "" : "s"}`, kind: "db" };
+  if (s.dataset === "cortile" || s.dataset === "buildings") return { text: `${s.dataset === "cortile" ? "Cortile" : "Building data"} · ${s.table ?? "data"} · ${n("row_ids")} row${n("row_ids") === 1 ? "" : "s"}`, kind: "db" };
   if (s.dataset === "listings") {
     if (n("listing_ids")) return { text: `Listings · ${n("listing_ids")} listing${n("listing_ids") === 1 ? "" : "s"}`, kind: "list" };
     return { text: `Auction results · ${n("result_ids")}`, kind: "list" };

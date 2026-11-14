@@ -93,7 +93,7 @@ export default function LoanGraphInner({ loan, forecast, signals, evidence }: { 
     nodes.push({ id: "hub:b", kind: "hub", col: 1, title: `${plural(allB.size, "building")}`, sub: hotB.size ? `${hotB.size} with warning signs` : "none with warning signs", hot: live && hotB.size > 0, x: COLX[1], y: span(sigAndOther.length ? sigAndOther : col2),
       detail: { what: `The ${plural(allB.size, "building")} behind this loan, from Cortile.`, value: hotB.size ? `${hotB.size} with warning signs` : "No warning signs", sources: ["Cortile"], effects: [] } });
     if (evNodes.length) nodes.push({ id: "hub:e", kind: "hub", col: 1, title: "Outside evidence", sub: "Market, news, comparables", hot: live, x: COLX[1], y: span(evNodes),
-      detail: { what: "Market data, news and sale or rent comparables that apply to the whole loan.", sources: ["MSCI RCA", "Parallel", "Listings"], effects: [] } });
+      detail: { what: "Market data, news and sale or rent comparables that apply to the whole loan.", sources: [...new Set(evList.flatMap(([, g]) => g.rows.map((r) => r.label || sourceLabel(r.source).text)))], effects: [] } });
     // keep the two hubs apart
     const hb = nodes.find((n) => n.id === "hub:b")!, he = nodes.find((n) => n.id === "hub:e");
     if (he && Math.abs(he.y - hb.y) < NH + 14) he.y = hb.y + NH + 14;

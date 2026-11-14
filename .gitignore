@@ -32,3 +32,4 @@ web/.next/
 web/tsconfig.tsbuildinfo
 .vercel
 web/.vercel
+web/demo-data/

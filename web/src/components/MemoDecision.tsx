@@ -6,8 +6,8 @@ import { getSupabase } from "@/lib/supabase";
 import { useToast } from "./Toast";
 import { useAuthor } from "@/lib/useAuthor";
 
-export default function MemoDecision({ draftId, runId, status, decidedBy, decidedAt, nextSeq, persist }: {
-  persist: boolean; draftId: number; runId: string; status: string; decidedBy: string | null; decidedAt: string | null; nextSeq: number;
+export default function MemoDecision({ draftId, runId, status, decidedBy, decidedAt, nextSeq, persist, readOnly = false }: {
+  persist: boolean; readOnly?: boolean; draftId: number; runId: string; status: string; decidedBy: string | null; decidedAt: string | null; nextSeq: number;
 }) {
   const router = useRouter();
   const ME = useAuthor();
@@ -46,12 +46,13 @@ export default function MemoDecision({ draftId, runId, status, decidedBy, decide
           {state.at && <> · {new Date(state.at).toLocaleString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</>}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          <button className="btn btn-dark justify-center" disabled={busy} onClick={() => decide("approved")}><Check className="w-4 h-4" aria-hidden="true" />Approve</button>
-          <button className="btn btn-ghost justify-center text-red-t" disabled={busy} onClick={() => decide("dismissed")}><X className="w-4 h-4" aria-hidden="true" />Dismiss</button>
+        <div className="grid grid-cols-2 gap-2 mt-4" title={readOnly ? "Read-only public demo" : undefined}>
+          <button className="btn btn-dark justify-center" disabled={busy || readOnly} onClick={() => decide("approved")}><Check className="w-4 h-4" aria-hidden="true" />Approve</button>
+          <button className="btn btn-ghost justify-center text-red-t" disabled={busy || readOnly} onClick={() => decide("dismissed")}><X className="w-4 h-4" aria-hidden="true" />Dismiss</button>
         </div>
       )}
-      {!decided && <p className="text-[12px] text-sub mt-3 flex items-center gap-1"><Clock className="w-3 h-3" aria-hidden="true" />Signing as {ME}</p>}
+      {readOnly && !decided && <p className="text-[12px] text-sub mt-3">Read-only public demo: sign-off is switched off here.</p>}
+      {!decided && !readOnly && <p className="text-[12px] text-sub mt-3 flex items-center gap-1"><Clock className="w-3 h-3" aria-hidden="true" />Signing as {ME}</p>}
       {toast}
     </div>
   );

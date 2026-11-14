@@ -130,7 +130,7 @@ export type Score = {
 };
 
 export type Bundle = {
-  source: "supabase" | "files" | "fixture";
+  source: "supabase" | "files" | "fixture" | "demo";
   run: Run;
   loans: Loan[];
   signals: Signal[];
