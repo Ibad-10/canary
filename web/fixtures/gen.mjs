@@ -29,8 +29,6 @@ const L = [
   ["L-040", "St Anne's Student", "St Anne's PBSA Ltd", "PBSA", "Nottingham", "Tom Hale", 10.2, 6.1, 19.2, [1.87, 1.86, 1.85], [0.53, 0.53, 0.54], [0.93, 0.93, 0.92], { icr_min: 1.4, icr_cash_trap: 1.55, ltv_max: 0.65, ltv_cash_trap: 0.62, occupancy_min: 0.8, test: "ICR" }, [81]],
 ];
 
-const interp = (a, b, t) => a + (b - a) * t;
-const pt = (v, k) => v; // placeholder
 function band(now, m3, m6, spread) {
   return {
     m3: { lo: r(m3 - spread * 0.5), mid: r(m3), hi: r(m3 + spread * 0.5) },
@@ -83,7 +81,7 @@ L.forEach((c, idx) => {
     ["occupancy", occ, cov.occupancy_min, metrics.occupancy.cash_trap, "below"],
   ];
   let status = "green", bm = null, bmonth = null, best = 99;
-  for (const [m, v, lim, trap, dir] of defs) {
+  for (const [m, v, lim, , dir] of defs) {
     const x = crossing(v, lim, dir);
     if (x !== null && x < best) { best = x; bm = m; bmonth = addM(Math.max(1, Math.ceil(x))); status = "red"; }
   }

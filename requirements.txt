@@ -8,5 +8,6 @@ requests>=2.31
 httpx>=0.27
 openai>=1.40
 reportlab>=4.0
+pypdf>=4.0
 fastapi>=0.110
 uvicorn>=0.29
