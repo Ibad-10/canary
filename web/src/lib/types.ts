@@ -52,6 +52,27 @@ export type Signal = {
 };
 
 export type Band = { lo: number; mid: number; hi: number };
+
+export type ForecastEvent = {
+  kind: string;
+  label: string;
+  date: string;
+  probability: number;
+  effect_text: string;
+  delta: { metric: string; amount: number };
+  signal_ids: number[];
+  evidence_ids: number[];
+};
+
+/** One month on the stepped forecast path (months 1..6). Older runs may omit `forecast`. */
+export type ForecastPoint = {
+  month: string;
+  lo: number;
+  mid: number;
+  hi: number;
+  events: ForecastEvent[];
+};
+
 export type Metric = {
   now: number;
   m3: Band;
@@ -59,6 +80,7 @@ export type Metric = {
   limit?: number | null;
   cash_trap?: number | null;
   series?: { month: string; value: number }[];
+  forecast?: ForecastPoint[];
 };
 export type MetricKey = "icr" | "ltv" | "occupancy";
 

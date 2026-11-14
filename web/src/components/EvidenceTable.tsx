@@ -97,7 +97,7 @@ export default function EvidenceTable({ loanId, persist, readOnly = false, forec
                 const { kind } = sourceLabel(r.source, r.label);
                 const Icon = ICON[kind];
                 return (
-                  <tr key={r.key} className="border-t border-line align-top">
+                  <tr key={r.key} id={r.key} className="border-t border-line align-top scroll-mt-24">
                     <td className="px-4 py-3 max-w-[360px]"><div className="font-medium">{r.finding}</div><div className="text-[12px] text-sub mt-0.5">{r.sub}</div></td>
                     <td className="text-right tnum font-semibold px-2 py-3 whitespace-nowrap">{r.value}</td>
                     <td className={`pl-8 py-3 max-w-[300px] ${r.hot ? "text-ink" : "text-sub"}`}>{r.why}</td>
