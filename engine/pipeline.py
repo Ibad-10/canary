@@ -139,7 +139,7 @@ def main(argv=None):
 
     s = now_iso()
     contracts = sorted((ROOT / "engine" / "contracts").glob("*.pdf"))
-    got, errs = 0, []
+    got, errs, checks = 0, [], []
     for path in contracts:
         match = [l for l in loans if l["id"].lower() in path.stem.lower()] or \
                 [l for l in loans if l["sector"].lower() in path.stem.lower()]
@@ -154,10 +154,14 @@ def main(argv=None):
                         match[0]["covenants"][key] = v * 100 if not key.startswith("icr") and v <= 1.5 else v
             match[0]["contract_file"] = str(path.relative_to(ROOT)).replace("\\", "/")
             got += 1
+            checks += [f"{path.name}: {c}" for c in (terms.get("checks") or [])]
         elif err:
             errs.append(err)
-    step("Extract covenants", "V7 Go", "done" if got else "fallback",
-         f"covenants read from {got} contract PDF(s)" if got else f"hand-typed covenant terms used ({len(contracts)} PDFs found{'; ' + errs[0] if errs else ''})", s)
+    extract_detail = (f"covenants read from {got} contract PDF(s)" if got else
+                      f"hand-typed covenant terms used ({len(contracts)} PDFs found{'; ' + errs[0] if errs else ''})")
+    if checks:
+        extract_detail += "; flags: " + "; ".join(checks)[:400]
+    step("Extract covenants", "V7 Go", "done" if got else "fallback", extract_detail, s)
 
     s = now_iso()
     sigs, _, _ = compute(loans, AS_OF)
