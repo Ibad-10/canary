@@ -81,7 +81,7 @@ After step 11 the engine writes `engine/out/<run_id>/*.json`, copies the same fi
 
 ### Step notes
 
-- **Load loans.** 12 loans on real Cortile developments: 5 build-to-rent, 2 student accommodation, 2 buy-to-let portfolios, 3 commercial (office, retail, logistics). Amounts are sized so the starting LTV sits between 55% and 65% and the ICR has headroom at origination. Covenant levels come from `LOAN_RULES.md`.
+- **Load loans.** 12 loans on real Cortile developments: 5 build-to-rent, 2 student accommodation, 2 buy-to-let portfolios, 3 commercial (office, retail, logistics). The book is a fixed development-id list (`FIXED_BOOK`) so selection does not depend on post-cutoff vacancy or tickets. Amounts are sized so the starting LTV sits between 55% and 65% and the ICR has headroom at origination (BTL sizing uses the PRA 5.5% stress rate; ongoing ICR uses the contractual rate). Covenant levels come from `LOAN_RULES.md`.
 - **Extract covenants.** V7 Go gets one project, a file property and a JSON property with a fixed schema (`icr_min`, `icr_cash_trap`, `ltv_max`, `ltv_cash_trap`, `test`). The engine uploads the PDF, polls for the result and checks all four numbers are present. Project ids are cached locally.
 - **Signals.** Nine signal kinds: arrears, service-charge overspend, compliance overdue, compliance missing, external-wall remediation, higher-risk building, emergency tickets, reopened tickets, vacancy. Each row stores `{dataset, table, row_ids, count}`.
 - **Comps.** Rent per unit from let listings, value per unit from sale listings and achieved auction prices, matched on postcode district and then city, by property type. Median with spread.
@@ -92,32 +92,42 @@ After step 11 the engine writes `engine/out/<run_id>/*.json`, copies the same fi
 
 ## 4. Forecast maths
 
-All of this is in `engine/forecast.py`.
+All of this is in `engine/forecast.py`. The live desk uses a **hybrid** model; a straight-line trend is kept as fallback and as a "challenger" that can only worsen colour.
 
 ```
 NOI   = gross rent x occupancy
         - operating costs (share of gross rent, by sector)
         - service-charge overspend not recovered
         - emergency and reopened repair cost
-        - leaseholder arrears
-ICR   = NOI / (loan x rate)
+        - arrears annual drag
+ICR   = NOI / (loan x contractual rate)
 Value = comps value x market factor x (1 - haircut) x (1 + news value change)
 LTV   = 100 x loan / Value
 ```
 
+### Hybrid method (default)
+
+Three layers, then 1000 Monte Carlo draws; bands are p10 / p50 / p90; status reads the p50 path.
+
+1. **Dated events** — lease expiries, fire-risk / safety-case due dates, service-charge year ends, repair costs rolling out of the trailing 12-month window, and news from the month it was published. Each event moves cash flow or value in the month it happens (with an estimated probability where needed).
+2. **Drift** — AutoETS on monthly repair spend (AutoARIMA fallback; recent mean if history is short). Residential occupancy is a **persistent two-state Markov** per unit (monthly move-out / let-up); move-out is ILLUSTRATIVE (~25%/yr PRS turnover in `OCC_MOVE_OUT_MONTHLY`), let-up is set so the steady state matches observed occupancy. Bands therefore widen with horizon.
+3. **Challenger** — the previous straight-line 6-month trend. If it crosses a cash-trap or default level the hybrid median does not, the loan takes the worse colour and a driver explains why.
+
 | Item | Rule |
 |---|---|
 | Operating costs | Share of gross rent: BTR 25%, PBSA 30%, BTL 0% (tested on gross rent), commercial 10%. Illustrative. |
-| Test rate | The loan rate. BTL uses the higher of the loan rate and 5.5%. |
+| Ongoing test rate | The contractual loan rate for every sector. |
+| BTL stress (5.5%) | PRA SS13/16 origination affordability only (`origination_rate` in loan sizing). Not used for ongoing ICR. |
+| Arrears | Cortile stores a **balance**. Annual ICR drag = `ARREARS_WRITEOFF_PCT` (default 25%) × borrower-attributable balance. Borrower's share of other leaseholders' arrears = service-charge share (never 100% just because freehold). No 12-month change is available — Cortile has no arrears history. |
 | Haircut | 5% if any building has external-wall remediation, plus 2% per overdue fire-risk or safety-case item, capped at 15%. Illustrative. |
-| Trend | Straight-line fit over the last 6 months of each metric. |
-| Range | `mid +/- 1.28 x spread x sqrt(months ahead)`. An 80% band. |
+| Linear fallback | Straight-line fit over the last 6 months; band `mid +/- 1.28 x spread x sqrt(h)`. Used if the hybrid raises, and as the challenger. |
 | Status | For each metric, walk the path from now to +6 months. Red if it crosses the default limit. Amber if it only crosses the cash trap. The loan takes the worst metric. |
 | First breach | The earliest month any metric crosses the default limit, with the metric named. |
+| `breach_kind` | `covenant` when ICR or occupancy drives the colour; `valuation_risk` when LTV does (modelled value, not a formal valuation). `null` when green. |
 | Occupancy | Also tested where the covenant has an occupancy minimum. |
 | Suppression | A correction removes one signal kind for one loan. That signal then adds nothing to NOI, haircut or occupancy. |
 | Stress | Rate up by `rate_bps`, base value moved by `value_pct`, then the same forecast. |
-| Drivers | Each move from underwriting to now is listed with its effect (for example "cuts 0.12x from ICR") and the signal and evidence ids behind it. Sorted by size. |
+| Drivers | Each move from underwriting to now (and forward dated events) with effect text and signal/evidence ids. Sorted by size. |
 
 ### News effects (fixed table)
 
@@ -130,18 +140,37 @@ LTV   = 100 x loan / Value
 
 Units are percent for rent and value, and percentage points for occupancy.
 
-### Backtest
+### Backtest (point-in-time)
 
-`backtest.py` runs the forecast twice. Once with data cut at 2026-05-31, once at 2026-11-12. It then compares the May forecast with the covenant status on the November data (current values, no projection).
+`backtest.py` forecasts with inputs cut at **2026-05-31**, then scores against **observed** covenant colours on November inputs (2026-11-12).
+
+**Point-in-time rules**
+
+- Tickets, compliance due dates and final service-charge years: only records dated `<=` cutoff.
+- Snapshot-only fields (occupancy, arrears, EWS status, higher-risk, compliance `no_record`) have no Cortile history. At the cutoff they are **excluded** — not filled from the November extract. The forecast then uses underwritten occupancy (with Markov churn around that mean, so bands still widen) and zero arrears/EWS haircut.
+- The 12-loan book is a **fixed development-id list** (`loans.FIXED_BOOK`), independent of post-cutoff vacancy or tickets.
+- News is switched off in the backtest.
+
+**Actual (ground truth)**
+
+`actual` = `observed_covenant` on November inputs: the same ICR/LTV/occupancy formulae applied to observed inputs only — **no forecast path**. This is **model-derived ground truth**, not an independent market outturn. Field: `actual_definition = "observed_covenant_november_inputs_no_forecast"`.
+
+**Baselines and scoring** (written into `runs.score`)
+
+| Field | Meaning |
+|---|---|
+| `model` / `persistence` | Side-by-side blocks with `n_loans`, `n_events`, `caught`, `missed`, `false_alarms`, `clear`, `exact_colour`, `exact_colour_accuracy`, `recall`, `recall_wilson_95` `{low,high}` |
+| Top-level `caught` / `missed` / `false_alarms` / `exact_status` | Legacy copies of the **model** block (UI keep-working) |
+| `persistence` | Colour at the cutoff persists through November |
+| `band_coverage` | Share of actual ICR/LTV/occupancy inside the cutoff forecast's p10–p90 at the November horizon month |
+| `per_loan[]` | Per loan: `predicted`, `persistence`, `actual`, `result`, `persistence_result`, predicted/actual metrics |
 
 | Result | Meaning |
 |---|---|
-| Caught | May forecast was amber or red, and November is amber or red |
-| Missed | May forecast was green, November is amber or red |
-| False alarm | May forecast was amber or red, November is green |
+| Caught | Forecast (or persistence) was amber or red, and November observed is amber or red |
+| Missed | Green at cutoff prediction, November observed amber or red |
+| False alarm | Amber or red predicted, November observed green |
 | Clear | Green in both |
-
-Latest run: 4 caught, 1 missed, 0 false alarms, 11 of 12 loans with the exact colour. Occupancy, arrears and external-wall status have no history in Cortile. The May run reads them from the snapshot. Tickets, compliance due dates and service-charge years are cut at the date. News is switched off in the backtest.
 
 ## 5. Data contract (Supabase)
 

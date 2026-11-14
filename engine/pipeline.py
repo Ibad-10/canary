@@ -23,7 +23,7 @@ COLUMNS = {
     "loans": ["id", "name", "borrower", "sector", "owner", "amount_gbp", "rate_pct", "value_gbp", "covenants",
               "development_ids", "building_ids", "contract_file", "synthetic_note"],
     "signals": ["id", "run_id", "loan_id", "building_id", "month", "kind", "value", "unit", "detail", "source"],
-    "forecasts": ["run_id", "loan_id", "status", "breach_metric", "breach_month", "metrics", "drivers"],
+    "forecasts": ["run_id", "loan_id", "status", "breach_metric", "breach_month", "breach_kind", "metrics", "drivers"],
     "evidence": ["id", "run_id", "loan_id", "kind", "title", "value", "unit", "effect", "label", "source"],
     "steps": ["id", "run_id", "seq", "step", "owner", "status", "detail", "started_at", "finished_at"],
     "drafts": ["id", "run_id", "loan_id", "kind", "title", "body_md", "model", "status", "decided_by", "decided_at", "note"],
@@ -233,8 +233,13 @@ def main(argv=None):
     s = now_iso()
     try:
         score = backtest.run(loans, lambda ls, a: compute(ls, a, {**hooks, "news": {}}))
+        pers = score.get("persistence") or {}
+        w = score.get("recall_wilson_95") or {}
+        wtxt = f", recall {score['recall']:.2f} [{w['low']:.2f},{w['high']:.2f}]" if score.get("recall") is not None and w.get("low") is not None else ""
         step("Backtest score", "Canary engine", "done",
-             f"cut at {BACKTEST_CUTOFF}: caught {score['caught']}, missed {score['missed']}, false alarms {score['false_alarms']}", s)
+             f"cut at {BACKTEST_CUTOFF}: model caught {score['caught']}, missed {score['missed']}, FA {score['false_alarms']}"
+             f"{wtxt}; persist caught {pers.get('caught')}, missed {pers.get('missed')}, FA {pers.get('false_alarms')}; "
+             f"band coverage {score.get('band_coverage')}", s)
     except Exception as e:
         score = None
         step("Backtest score", "Canary engine", "failed", f"{type(e).__name__}: {e}"[:300], s)

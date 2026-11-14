@@ -1,23 +1,23 @@
 """Monthly Cortile signals per loan. Every row cites {dataset:'cortile', table, row_ids, count}.
 
-History caveat: Cortile is a snapshot. Tickets, compliance due dates and final service-charge years are dated,
-so they are cut at `as_of`. Occupancy, leaseholder arrears, EWS status and is_higher_risk have no history and
-are read as at the snapshot whatever `as_of` is.
-
-Dated events inside the forecast horizon (series['events']): commercial lease expiries, fire-risk / safety-case
-due dates and service-charge year ends. Each carries the probability it bites, measured on the whole Cortile book.
+Point-in-time: tickets, compliance due dates and final service-charge years are dated and cut at `as_of`.
+Snapshot-only fields (occupancy, leaseholder arrears, EWS status, is_higher_risk, compliance no_record) have
+no history in Cortile. They are included only when as_of >= AS_OF (the extract date). At an earlier cutoff
+they are EXCLUDED — not filled with today's value — so the backtest cannot leak the future.
 """
 import sqlite3
 from functools import lru_cache
 
 import pandas as pd
 
-from engine.config import CORTILE_DB, FIRST_MONTH, HORIZON
+from engine.config import AS_OF, ARREARS_WRITEOFF_PCT, CORTILE_DB, FIRST_MONTH, HORIZON
 
 CAP_IDS = 50
 HAIRCUT_TYPES = {"fire_risk_assessment", "safety_case_report"}
 EWS_BAD = {"remediation_in_progress", "remediation_planned"}
 SC_YEAR_START, SC_RECOGNISED = "2026-01-01", "2026-11-01"  # in-progress service-charge year counts from month 11
+# Kinds that exist only as a live Cortile snapshot (no dated history).
+SNAPSHOT_KINDS = ("vacancy", "arrears", "ews_remediation", "higher_risk", "compliance_missing")
 
 
 @lru_cache(maxsize=1)
@@ -46,6 +46,11 @@ def horizon_end(as_of):
     return (pd.Timestamp(as_of[:7] + "-01") + pd.DateOffset(months=HORIZON) + pd.offsets.MonthEnd(0)).strftime("%Y-%m-%d")
 
 
+def use_snapshot(as_of):
+    """True only at/after the Cortile extract date — snapshot fields are not known earlier."""
+    return as_of >= AS_OF
+
+
 @lru_cache(maxsize=4)
 def miss_rate(as_of):
     """Book-wide share of fire-risk / safety-case items due in the 12 months to as_of that went overdue."""
@@ -59,7 +64,11 @@ def miss_rate(as_of):
 
 @lru_cache(maxsize=4)
 def vacate_rate(as_of):
-    """Book-wide share of commercial leases that ended on or before as_of whose unit is now vacant."""
+    """Book-wide share of commercial leases that ended on or before as_of whose unit is vacant at the extract.
+
+    Vacancy itself is snapshot-only, so this prior is only used when use_snapshot(as_of). At an earlier
+    cutoff the forecast uses a neutral 50% leave probability instead (see build).
+    """
     t = tables()
     u = t["units"].set_index("id")
     ls = t["leases"][t["leases"].unit_id.map(u.tenure) == "commercial_lease"]
@@ -87,6 +96,7 @@ def build(loan, as_of, next_id):
 
     loan['_'] holds internal fields: building_ids, unit_ids (income units), freehold (bool).
     next_id: callable returning the next signal id.
+    Snapshot-only fields are omitted when as_of < AS_OF.
     """
     t = tables()
     inner = loan["_"]
@@ -95,6 +105,8 @@ def build(loan, as_of, next_id):
     ms = months(as_of)
     rows = []
     sig = {}
+    snap = use_snapshot(as_of)
+    excluded = [] if snap else list(SNAPSHOT_KINDS)
 
     def add(kind, month, value, unit, detail, source, building_id=None):
         r = {"id": next_id(), "run_id": None, "loan_id": lid, "building_id": building_id, "month": month,
@@ -184,19 +196,24 @@ def build(loan, as_of, next_id):
                 events.append({"kind": "service_charge_year_end", "date": fy, "label": f"Service-charge year end {fy}",
                                "cost_change": -gone, "probability": 1.0, "signal_ids": [r["id"]]})
 
-    # leaseholder arrears (snapshot)
-    ls = t["leases"][t["leases"].building_id.isin(bids) & (t["leases"].arrears_gbp > 0)]
+    # leaseholder arrears: snapshot stock -> annual flow (see ARREARS_WRITEOFF_PCT). Borrower's share only.
     arrears_drag = 0.0
-    for b, g in ls.groupby("building_id"):
-        own = g[g.unit_id.isin(uids)].arrears_gbp.sum()
-        other = g[~g.unit_id.isin(uids)].arrears_gbp.sum()
-        arrears_drag += own + other * (1.0 if inner["freehold"] else float(share.get(b, 0.0)))
-    if len(ls):
-        add("arrears", snap_month, ls.arrears_gbp.sum(), "GBP",
-            f"{len(ls)} leases in arrears (service charge / ground rent), GBP {ls.arrears_gbp.sum():,.0f}; GBP {arrears_drag:,.0f} falls on the borrower",
-            _src("leases", ls.id))
+    arrears_balance = 0.0
+    if snap:
+        ls = t["leases"][t["leases"].building_id.isin(bids) & (t["leases"].arrears_gbp > 0)]
+        for b, g in ls.groupby("building_id"):
+            own = float(g[g.unit_id.isin(uids)].arrears_gbp.sum())
+            other = float(g[~g.unit_id.isin(uids)].arrears_gbp.sum())
+            # Always the borrower's service-charge share of other leaseholders' arrears — never 100% just because freehold.
+            arrears_balance += own + other * float(share.get(b, 0.0))
+        arrears_drag = ARREARS_WRITEOFF_PCT * arrears_balance
+        if len(ls):
+            add("arrears", snap_month, arrears_drag, "GBP",
+                f"{len(ls)} leases in arrears (service charge / ground rent), balance GBP {arrears_balance:,.0f}; "
+                f"annual ICR drag GBP {arrears_drag:,.0f} (= {ARREARS_WRITEOFF_PCT:.0%} write-off share of borrower-attributable balance)",
+                _src("leases", ls.id))
 
-    # compliance: overdue by month (reconstructed from next_due_on), no_record as snapshot
+    # compliance: overdue by month (reconstructed from next_due_on); no_record is snapshot-only
     cp = t["compliance"][t["compliance"].building_id.isin(bids)]
     od = cp[cp.status == "overdue"]
     overdue_n, haircut_n = [], []
@@ -218,48 +235,66 @@ def build(loan, as_of, next_id):
         for c in due.itertuples():
             events.append({"kind": "compliance_due", "date": c.next_due_on[:10], "label": f"{c.label} due, {names.get(c.building_id, c.building_id)}",
                            "items": 1, "probability": round(p, 4), "signal_ids": [r["id"]]})
-    nr = cp[cp.status == "no_record"]
-    if len(nr):
-        add("compliance_missing", snap_month, len(nr), "items", f"{len(nr)} compliance items with no record ({', '.join(nr.label.unique()[:3])})",
-            _src("compliance_items", nr.id))
+    if snap:
+        nr = cp[cp.status == "no_record"]
+        if len(nr):
+            add("compliance_missing", snap_month, len(nr), "items", f"{len(nr)} compliance items with no record ({', '.join(nr.label.unique()[:3])})",
+                _src("compliance_items", nr.id))
 
-    # buildings: EWS remediation and higher-risk (snapshot)
-    bl = t["buildings"][t["buildings"].id.isin(bids)]
-    ews = bl[bl.external_wall_status.isin(EWS_BAD)]
-    for b in ews.itertuples():
-        add("ews_remediation", snap_month, 1, "building", f"{b.name}: external wall {b.external_wall_status.replace('_', ' ')}",
-            _src("buildings", [b.id]), building_id=b.id)
-    hr = bl[bl.is_higher_risk == 1]
-    if len(hr):
-        add("higher_risk", snap_month, len(hr), "buildings", f"{len(hr)} of {len(bl)} buildings are higher-risk (18m+ / 7+ storeys)", _src("buildings", hr.id))
+    # buildings: EWS remediation and higher-risk (snapshot only)
+    ews_n = 0
+    if snap:
+        bl = t["buildings"][t["buildings"].id.isin(bids)]
+        ews = bl[bl.external_wall_status.isin(EWS_BAD)]
+        ews_n = int(len(ews))
+        for b in ews.itertuples():
+            add("ews_remediation", snap_month, 1, "building", f"{b.name}: external wall {b.external_wall_status.replace('_', ' ')}",
+                _src("buildings", [b.id]), building_id=b.id)
+        hr = bl[bl.is_higher_risk == 1]
+        if len(hr):
+            add("higher_risk", snap_month, len(hr), "buildings", f"{len(hr)} of {len(bl)} buildings are higher-risk (18m+ / 7+ storeys)", _src("buildings", hr.id))
 
-    # vacancy of income units (snapshot)
-    vac = inc[inc.occupancy == "vacant"]
-    occ = 1.0 - len(vac) / max(1, len(inc))
-    add("vacancy", snap_month, 100 * (1 - occ), "%", f"{len(vac)} of {len(inc)} income units vacant", _src("units", vac.id))
+    # vacancy of income units (snapshot only). When excluded, occupancy is None -> forecast uses underwritten.
+    if snap:
+        vac = inc[inc.occupancy == "vacant"]
+        occ = 1.0 - len(vac) / max(1, len(inc))
+        vacant_units = int(len(vac))
+        add("vacancy", snap_month, 100 * (1 - occ), "%", f"{len(vac)} of {len(inc)} income units vacant", _src("units", vac.id))
+    else:
+        occ = None
+        vacant_units = None
 
-    # lease expiries on let income units inside the horizon; rent share by floor area (commercial rent is priced per sq ft)
+    # lease expiries on let income units inside the horizon; rent share by floor area
     area = float(inc.floor_area_sqm.sum()) or 1.0
-    occupied = inc[inc.occupancy == "occupied"].set_index("id")
+    if snap:
+        occupied = inc[inc.occupancy == "occupied"].set_index("id")
+        leave_p, vacant_n, ended_n = vacate_rate(as_of)
+        leave_note = f"book-wide {vacant_n} of {ended_n} ended commercial leases left the unit vacant"
+    else:
+        # Without snapshot occupancy we cannot see who is let today; use all income units with a lease ending,
+        # and a neutral leave probability (vacancy status would leak the extract).
+        occupied = inc.set_index("id")
+        leave_p, vacant_n, ended_n = 0.5, 0, 0
+        leave_note = "neutral 50% leave probability (occupancy snapshot excluded at this cutoff)"
     ending = t["leases"][t["leases"].unit_id.isin(occupied.index) & (t["leases"].end > as_of) & (t["leases"].end <= h_end)]
     if len(ending):
-        p, vacant, n = vacate_rate(as_of)
         for le in ending.sort_values("end").itertuples():
             u = occupied.loc[le.unit_id]
             rent_share = float(u.floor_area_sqm) / area
             r = add("lease_expiry", snap_month, 100 * rent_share, "% of income",
-                    f"{u.unit_number} lease to {le.leaseholder_name} ends {le.end} ({rent_share:.0%} of income floor area); "
-                    f"book-wide {vacant} of {n} ended commercial leases left the unit vacant", _src("leases", [le.id]), building_id=le.building_id)
+                    f"{u.unit_number} lease to {le.leaseholder_name} ends {le.end} ({rent_share:.0%} of income floor area); {leave_note}",
+                    _src("leases", [le.id]), building_id=le.building_id)
             events.append({"kind": "lease_expiry", "date": le.end, "label": f"Lease expiry {u.unit_number} ({le.leaseholder_name})",
-                           "rent_share": round(rent_share, 4), "units": 1, "probability": round(p, 4), "signal_ids": [r["id"]]})
+                           "rent_share": round(rent_share, 4), "units": 1, "probability": round(leave_p, 4), "signal_ids": [r["id"]]})
 
     series = {
         "months": ms, "em_cost": em_cost, "ro_cost": ro_cost, "overspend": over_series,
         "em_month": month_cost["emergency_tickets"], "ro_month": month_cost["reopened_tickets"],
         "em_sig": month_sig["emergency_tickets"], "ro_sig": month_sig["reopened_tickets"],
         "overdue": overdue_n, "haircut_items": haircut_n,
-        "arrears": arrears_drag, "occupancy": occ, "ews": int(len(ews)),
-        "income_units": int(len(inc)), "vacant_units": int(len(vac)), "sig": sig,
+        "arrears": arrears_drag, "arrears_balance": arrears_balance, "occupancy": occ, "ews": ews_n,
+        "income_units": int(len(inc)), "vacant_units": vacant_units, "sig": sig,
         "events": sorted(events, key=lambda e: e["date"]),
+        "snapshot_excluded": excluded,
     }
     return rows, series

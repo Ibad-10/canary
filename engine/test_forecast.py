@@ -129,7 +129,7 @@ def test_schema_and_fallback():
     inp["series"]["em_month"] = [500.0 * (i % 3) for i in range(12)]
     inp["series"]["ro_month"] = [0.0] * 12
     f = F.forecast(inp)
-    assert set(f) == {"loan_id", "status", "breach_metric", "breach_month", "metrics", "drivers"}
+    assert set(f) == {"loan_id", "status", "breach_metric", "breach_month", "breach_kind", "metrics", "drivers"}
     for k, m in f["metrics"].items():
         assert {"now", "m3", "m6", "limit", "cash_trap", "series", "forecast"} <= set(m)
         assert m["m3"].keys() == m["m6"].keys() == {"lo", "mid", "hi"}
@@ -153,6 +153,68 @@ def test_challenger_keeps_worse_colour():
     assert both["metrics"]["ltv"]["m6"] == hyb["metrics"]["ltv"]["m6"]
     if lin["status"] != hyb["status"]:
         assert both["drivers"][0]["label"].startswith("Straight-line challenger")
+
+
+def test_arrears_is_annual_flow_not_full_balance():
+    from engine.config import ARREARS_WRITEOFF_PCT
+    inp = _inputs()
+    balance = 100_000.0
+    inp["series"]["arrears"] = ARREARS_WRITEOFF_PCT * balance
+    f = F.forecast_hybrid(inp)
+    i_gbp = 12_000_000 * 0.06
+    # Full balance would cut ICR by 100k/720k; flow cuts by 25k/720k
+    close(f["metrics"]["icr"]["now"], (1_600_000 - ARREARS_WRITEOFF_PCT * balance) / i_gbp)
+    assert ARREARS_WRITEOFF_PCT * balance < balance
+
+
+def test_btl_stress_not_in_ongoing_rate():
+    assert F.origination_rate("BTL", 5.0) == 5.5
+    assert F.origination_rate("BTR", 5.0) == 5.0
+    inp = _inputs()
+    inp["sector"] = "BTL"  # opex 0%; NOI = gross_rent x occ
+    inp["test_rate_pct"] = 5.0  # ongoing contractual rate, not 5.5
+    f = F.forecast_hybrid(inp)
+    close(f["metrics"]["icr"]["now"], inp["gross_rent"] / (12_000_000 * 0.05))
+
+
+def test_ltv_breach_kind_is_valuation_risk():
+    inp = _inputs()
+    inp["base_value"] = 15_000_000  # LTV 80% > 65%
+    f = F.forecast(inp)
+    assert f["status"] == "red" and f["breach_metric"] == "ltv"
+    assert f["breach_kind"] == "valuation_risk"
+    inp2 = _inputs()
+    inp2["series"]["events"] = [{"kind": "lease_expiry", "date": "2026-03-10", "label": "x",
+                                 "rent_share": 0.5, "units": 1, "probability": 1.0, "signal_ids": []}]
+    g = F.forecast_hybrid(inp2)
+    assert g["breach_metric"] == "icr" and g["breach_kind"] == "covenant"
+
+
+def test_markov_occupancy_widens_bands():
+    inp = _inputs()
+    inp["covenants"]["occupancy_min"] = 85.0
+    inp["covenants"]["occupancy_cash_trap"] = 90.0
+    inp["series"]["occupancy"] = 0.92
+    inp["series"]["vacant_units"] = 8
+    f = F.forecast_hybrid(inp)
+    widths = [p["hi"] - p["lo"] for p in f["metrics"]["occupancy"]["forecast"]]
+    assert widths[-1] >= widths[0] - 1e-9  # horizon should not shrink bands
+    assert "Markov" in f["metrics"]["icr"]["model"]["drift"]["occupancy"]
+
+
+def test_snapshot_excluded_uses_underwritten_occupancy():
+    inp = _inputs()
+    inp["covenants"]["occupancy_min"] = 85.0
+    inp["series"]["occupancy"] = None
+    inp["series"]["snapshot_excluded"] = ["vacancy", "arrears", "ews_remediation"]
+    inp["series"]["arrears"] = 0.0
+    inp["series"]["ews"] = 0
+    inp["underwritten_occ"] = 0.96
+    f = F.forecast_hybrid(inp)
+    close(f["metrics"]["occupancy"]["now"], 96.0)
+    # No leak of extract vacancy; Markov still runs around underwritten so bands can widen
+    assert "underwritten" in f["metrics"]["icr"]["model"]["drift"]["occupancy"]
+    assert "Markov" in f["metrics"]["icr"]["model"]["drift"]["occupancy"]
 
 
 if __name__ == "__main__":

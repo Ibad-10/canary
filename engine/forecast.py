@@ -3,14 +3,17 @@
 NOI = gross rent x occupancy - opex - unrecovered service-charge overspend - emergency/reopened repair cost - arrears drag
 ICR = NOI / interest.  Value = base value x market factor x (1 - compliance haircut).  LTV = loan / value.
 
+Arrears drag is an annual flow = ARREARS_WRITEOFF_PCT x borrower-attributable balance (see config.py / ARCHITECTURE).
+Ongoing ICR uses the contractual loan rate. The PRA SS13/16 5.5% BTL stress is origination-only (origination_rate).
+
 Monthly forecast for h = 1..HORIZON, in three layers:
 - events: dated items in the inputs move the cash flow in the month they happen (lease expiries, fire-risk /
   safety-case due dates, service-charge year ends, repair costs leaving the 12-month test window, news from the
   month it was published). No field, no event.
 - drift: AutoETS (Nixtla statsforecast, AutoARIMA as the alternative) on monthly repair spend, the only driver with
-  monthly history in Cortile; binomial unit churn on occupancy at the observed rate.
+  monthly history in Cortile; persistent two-state Markov unit churn on residential occupancy.
 - Monte Carlo: N_DRAWS paths through the NOI / value formulas; lo / mid / hi = p10 / p50 / p90. Status reads p50.
-The PR's straight-line model is kept as forecast_linear (fallback and backtest comparison).
+The straight-line model is kept as forecast_linear (fallback and challenger).
 """
 import copy
 import math
@@ -19,7 +22,7 @@ import zlib
 import numpy as np
 import pandas as pd
 
-from engine.config import HORIZON
+from engine.config import ARREARS_WRITEOFF_PCT, HORIZON, OCC_MOVE_OUT_MONTHLY
 
 # Opex as a share of gross rent. LOAN_RULES 5.1 cites a broker range of 25-35% of gross rent for BTR *including*
 # voids; voids are modelled separately here, so resi takes the bottom of that range. BTL is tested on gross rent
@@ -29,7 +32,7 @@ UNDERWRITTEN_OCC = {"BTR": 0.96, "PBSA": 0.97, "BTL": 0.95, "Office": 1.0, "Reta
 RESIDENTIAL = {"BTR", "PBSA", "BTL"}
 # ILLUSTRATIVE investment yields used to value income-producing blocks at origination (BTL is valued on comps).
 CAP_RATE = {"BTR": 0.0475, "PBSA": 0.0525, "Office": 0.0700, "Retail": 0.0750, "Logistics": 0.0575}
-BTL_STRESS_RATE = 5.5
+BTL_STRESS_RATE = 5.5  # PRA SS13/16 origination affordability floor — not the ongoing covenant test rate
 # ILLUSTRATIVE compliance haircut on value.
 EWS_HAIRCUT, ITEM_HAIRCUT, MAX_HAIRCUT = 0.05, 0.02, 0.15
 Z = 1.28  # 80% band (linear model)
@@ -64,8 +67,13 @@ def haircut(ews_buildings, overdue_items):
     return min(MAX_HAIRCUT, (EWS_HAIRCUT if ews_buildings else 0.0) + ITEM_HAIRCUT * overdue_items)
 
 
-def test_rate(sector, rate_pct):
+def origination_rate(sector, rate_pct):
+    """PRA SS13/16 BTL stress (min 5.5%) for origination affordability / loan sizing only."""
     return max(rate_pct, BTL_STRESS_RATE) if sector == "BTL" else rate_pct
+
+
+# Backwards-compatible alias — prefer origination_rate; never use for ongoing covenant ICR.
+test_rate = origination_rate
 
 
 def check(value, limit, cash_trap, higher_is_better):
@@ -80,12 +88,32 @@ def check(value, limit, cash_trap, higher_is_better):
     return "green"
 
 
+def breach_kind_for(metric):
+    """LTV moves are modelled valuation risk (not a formal valuation); ICR/occupancy are covenant tests."""
+    if metric == "ltv":
+        return "valuation_risk"
+    if metric in ("icr", "occupancy"):
+        return "covenant"
+    return None
+
+
+def _occupancy_rate(inp, sup=None):
+    """Observed occupancy, or underwritten when vacancy is suppressed / snapshot-excluded (None)."""
+    sup = set(sup if sup is not None else inp.get("suppress") or ())
+    if "vacancy" in sup or "vacancy" in (inp["series"].get("snapshot_excluded") or ()):
+        return float(inp["underwritten_occ"])
+    occ = inp["series"]["occupancy"]
+    if occ is None:
+        return float(inp["underwritten_occ"])
+    return float(occ)
+
+
 # ---- series ----
 def _point(inp, i, adj=None):
     """ICR, LTV %, occupancy % at month index i. adj = news deltas {occupancy pp, rent/value/opex pct}."""
     adj = adj or {}
-    s, sup = inp["series"], inp.get("suppress", set())
-    occ = inp["underwritten_occ"] if "vacancy" in sup else s["occupancy"]
+    s, sup = inp["series"], set(inp.get("suppress") or ())
+    occ = _occupancy_rate(inp, sup)
     occ = min(1.0, max(0.0, occ + adj.get("occupancy", 0.0) / 100.0))
     gross = inp["gross_rent"] * (1 + adj.get("rent", 0.0) / 100.0)
     opex = OPEX_PCT[inp["sector"]] * gross * (1 + adj.get("opex", 0.0) / 100.0)
@@ -93,7 +121,8 @@ def _point(inp, i, adj=None):
         ("sc_overspend", s["overspend"][i]), ("emergency_tickets", s["em_cost"][i]),
         ("reopened_tickets", s["ro_cost"][i]), ("arrears", s["arrears"])))
     n = noi(gross, occ, opex, costs)
-    hc = haircut(0 if "ews_remediation" in sup else s["ews"], 0 if "compliance_overdue" in sup else s["haircut_items"][i])
+    ews = 0 if ("ews_remediation" in sup or "ews_remediation" in (s.get("snapshot_excluded") or ())) else s["ews"]
+    hc = haircut(ews, 0 if "compliance_overdue" in sup else s["haircut_items"][i])
     value = inp["base_value"] * inp.get("market_factor", 1.0) * (1 - hc) * (1 + adj.get("value", 0.0) / 100.0)
     return {"icr": icr(n, interest(inp["amount"], inp["test_rate_pct"])), "ltv": ltv(inp["amount"], value),
             "occupancy": 100.0 * occ, "noi": n, "value": value, "haircut": hc}
@@ -144,6 +173,26 @@ LIMITS = {  # metric -> (limit key, cash trap key, higher is better)
 ORDER = ["green", "amber", "red"]
 
 
+def observed_covenant(inp):
+    """Covenant colours from observed inputs at the last month only — no forecast path.
+
+    This is model-derived ground truth (same NOI/LTV formulae as the live desk), not an independent
+    market outturn. Used by the backtest as 'actual'.
+    """
+    last = len(inp["series"]["months"]) - 1
+    pt = _point(inp, last)
+    cov = inp["covenants"]
+    worst, metric = "green", None
+    for k, (lk, ck, hib) in LIMITS.items():
+        if cov.get(lk) is None:
+            continue
+        st = check(pt[k], cov[lk], cov.get(ck), hib)
+        if ORDER.index(st) > ORDER.index(worst):
+            worst, metric = st, k
+    return {"status": worst, "metric": metric, "breach_kind": breach_kind_for(metric) if worst != "green" else None,
+            "icr": pt["icr"], "ltv": pt["ltv"], "occupancy": pt["occupancy"], "noi": pt["noi"], "value": pt["value"]}
+
+
 def _effect_text(metric, amount):
     verb = ("Cuts" if amount < 0 else "Adds") if metric == "icr" else ("Adds" if amount > 0 else "Takes")
     if metric == "icr":
@@ -152,17 +201,24 @@ def _effect_text(metric, amount):
 
 
 def _status(metrics_paths, cov, start_month):
-    """metrics_paths: {metric: [now, h1..hN]} -> (status, breach_metric, breach_month)."""
-    status, breach = "green", []
+    """metrics_paths: {metric: [now, h1..hN]} -> (status, breach_metric, breach_month, status_metric)."""
+    status, breach, drivers = "green", [], []
     for k, path in metrics_paths.items():
         lk, ck, hib = LIMITS[k]
         st = max((check(v, cov[lk], cov.get(ck), hib) for v in path), key=ORDER.index)
-        status = max(status, st, key=ORDER.index)
+        if ORDER.index(st) > ORDER.index(status):
+            status = st
+        if st != "green":
+            drivers.append((ORDER.index(st), list(LIMITS).index(k), k))
         first = next((h for h, v in enumerate(path) if check(v, cov[lk], None, hib) == "red"), None)
         if first is not None:
             breach.append((first, list(LIMITS).index(k), k))
     breach.sort()
-    return (status, breach[0][2], _add_months(start_month, breach[0][0])) if breach else (status, None, None)
+    drivers.sort(reverse=True)
+    status_metric = drivers[0][2] if drivers else None
+    if breach:
+        return status, breach[0][2], _add_months(start_month, breach[0][0]), status_metric
+    return status, None, None, status_metric
 
 
 # ---- drift layer ----
@@ -234,17 +290,38 @@ def _simulate(inp):
         event(h0, "news", e.get("title", "News"), deltas, 1.0, (), [e["id"]] if e.get("id") is not None else [],
               (e.get("source") or {}).get("published"), news=(met, delta))
 
-    # occupancy: binomial churn of residential lets around the observed rate (Cortile has no occupancy history);
-    # commercial income is contracted and only moves at lease events
+    # occupancy: persistent two-state Markov per unit (bands widen with horizon).
+    # Analyst suppress of vacancy -> hold underwritten. Snapshot-excluded occupancy -> Markov around
+    # underwritten (no leak of today's vacancy; uncertainty still grows with horizon).
+    # Commercial income is contracted and only moves at lease events.
     units = int(s.get("income_units") or 0)
-    occ0 = inp["underwritten_occ"] if "vacancy" in sup else s["occupancy"]
-    if "vacancy" in sup or units == 0 or inp["sector"] not in RESIDENTIAL:
+    snap_ex = set(s.get("snapshot_excluded") or ())
+    occ0 = _occupancy_rate(inp, sup)
+    commercial_or_empty = units == 0 or inp["sector"] not in RESIDENTIAL
+    suppressed = "vacancy" in sup
+    if suppressed or commercial_or_empty:
         occ = np.full((n, H), float(occ0))
-        model["drift"]["occupancy"] = "held at the " + ("underwritten" if "vacancy" in sup else "observed") + " rate" + \
+        why = "underwritten" if suppressed or s.get("occupancy") is None else "observed"
+        model["drift"]["occupancy"] = f"held at the {why} rate" + \
             ("; moves only at lease events" if inp["sector"] not in RESIDENTIAL else "")
     else:
-        occ = rng.binomial(units, occ0, size=(n, H)) / units
-        model["drift"]["occupancy"] = f"binomial churn of {units} units at the observed {100 * occ0:.1f}% (no occupancy history)"
+        # Steady-state matching occ0: π = p_in / (p_out + p_in). p_out from config; p_in from mean occ.
+        p_out = float(OCC_MOVE_OUT_MONTHLY)
+        p_in = p_out * occ0 / max(1e-9, 1.0 - occ0) if occ0 < 1.0 else 1.0
+        p_in = min(1.0, max(0.0, p_in))
+        n_occ = np.full(n, int(round(occ0 * units)), dtype=int)
+        n_occ = np.clip(n_occ, 0, units)
+        occ = np.empty((n, H), dtype=float)
+        for h in range(H):
+            move_out = rng.binomial(n_occ, p_out)
+            after_out = n_occ - move_out
+            let_up = rng.binomial(units - after_out, p_in)
+            n_occ = after_out + let_up
+            occ[:, h] = n_occ / units
+        base = "underwritten (snapshot excluded)" if ("vacancy" in snap_ex or s.get("occupancy") is None) else "observed"
+        model["drift"]["occupancy"] = (f"Markov churn of {units} units from {base} {100 * occ0:.1f}%: "
+                                       f"monthly move-out {p_out:.4f}, let-up {p_in:.4f} "
+                                       f"(p_out ILLUSTRATIVE ~25%/yr PRS turnover)")
     occ = np.clip(occ + adj["occupancy"] / 100.0, 0.0, 1.0)
     gross = inp["gross_rent"] * (1 + adj["rent"] / 100.0)
     opex = OPEX_PCT[inp["sector"]] * gross * (1 + adj["opex"] / 100.0)
@@ -253,7 +330,7 @@ def _simulate(inp):
     lost_share, lost_units = np.zeros((n, H)), np.zeros((n, H))
     over = np.full(H, 0.0 if "sc_overspend" in sup else float(s["overspend"][last]))
     items = np.full((n, H), 0.0 if "compliance_overdue" in sup else float(s["haircut_items"][last]))
-    ews = 0 if "ews_remediation" in sup else s["ews"]
+    ews = 0 if ("ews_remediation" in sup or "ews_remediation" in snap_ex) else s["ews"]
     clean_value = inp["base_value"] * inp.get("market_factor", 1.0)
     for e in s.get("events") or []:
         kind, p = e["kind"], float(e.get("probability", 1.0))
@@ -317,7 +394,8 @@ def _simulate(inp):
         gone = sum(hist[j - 12] for j in range(last + 1, last + H + 1) if 0 <= j - 12 <= last)
         repair_note.append((name, gone, float(mean.sum()), method, kind))
 
-    arrears = 0.0 if "arrears" in sup else float(s["arrears"])
+    # s["arrears"] is already the annual flow (write-off share of balance); see config.ARREARS_WRITEOFF_PCT
+    arrears = 0.0 if ("arrears" in sup or "arrears" in snap_ex) else float(s["arrears"])
     income = gross * occ - gross * lost_share
     noi_d = income - opex - over - repair - arrears
     value = clean_value * (1 - np.minimum(MAX_HAIRCUT, (EWS_HAIRCUT if ews else 0.0) + ITEM_HAIRCUT * items)) * (1 + adj["value"] / 100.0)
@@ -387,11 +465,13 @@ def forecast_hybrid(inp):
                       "series": [{"month": m, "value": round(p[k], 3)} for m, p in zip(ms, pts)],
                       "forecast": fc, "model": sim["model"]}
         paths[k] = [now] + [float(x) for x in q[1]]
-    status, bm, bmonth = _status(paths, cov, ms[-1])
+    status, bm, bmonth, status_metric = _status(paths, cov, ms[-1])
     out = drivers(inp, pts, metrics)
     out += _event_drivers(sim, metrics)
     out.sort(key=lambda x: -abs(x["delta"]["amount"]) * (10 if x["delta"]["metric"] == "icr" else 1))
+    kind_metric = bm or status_metric
     return {"loan_id": inp["loan_id"], "status": status, "breach_metric": bm, "breach_month": bmonth,
+            "breach_kind": breach_kind_for(kind_metric) if status != "green" else None,
             "metrics": metrics, "drivers": out}
 
 
@@ -444,27 +524,30 @@ def drivers(inp, pts, metrics):
         out.append({"kind": kind, "label": label, "effect_text": _effect_text(metric, amount), "delta": {"metric": metric, "amount": round(amount, 3)},
                     "signal_ids": list(signal_ids)[-6:], "evidence_ids": list(evidence_ids)})
 
-    if "vacancy" not in sup:
+    snap_ex = set(s.get("snapshot_excluded") or ())
+    if "vacancy" not in sup and "vacancy" not in snap_ex and s.get("occupancy") is not None:
         lost = inp["gross_rent"] * (inp["underwritten_occ"] - s["occupancy"])
-        d("vacancy", f"{s['vacant_units']} of {s['income_units']} units empty ({100 * (1 - s['occupancy']):.1f}% vacancy vs {100 * (1 - inp['underwritten_occ']):.0f}% underwritten)",
+        vac_n = s.get("vacant_units") or 0
+        d("vacancy", f"{vac_n} of {s['income_units']} units empty ({100 * (1 - s['occupancy']):.1f}% vacancy vs {100 * (1 - inp['underwritten_occ']):.0f}% underwritten)",
           "icr", -lost / i_gbp, sig.get("vacancy", []), ev.get("rent", []))
     for kind, val, label in (
             ("sc_overspend", s["overspend"][last], "Service-charge overspend the landlord has to fund"),
             ("emergency_tickets", s["em_cost"][last], "Emergency repair cost, last 12 months"),
             ("reopened_tickets", s["ro_cost"][last], "Repeat repairs (reopened tickets), last 12 months"),
-            ("arrears", s["arrears"], "Leaseholder arrears the borrower has to cover")):
-        if kind not in sup and val > 0:
+            ("arrears", s["arrears"], f"Leaseholder arrears annual drag ({ARREARS_WRITEOFF_PCT:.0%} of borrower-attributable balance)")):
+        if kind not in sup and kind not in snap_ex and val > 0:
             d(kind, f"{label}: GBP {val:,.0f}", "icr", -val / i_gbp, sig.get(kind, []))
     if "ltv" in metrics:
         base = inp["base_value"] * inp.get("market_factor", 1.0)
         ltv_clean = ltv(inp["amount"], base)
-        if s["ews"] and "ews_remediation" not in sup:
-            d("ews_remediation", f"External wall remediation on {s['ews']} building(s): {EWS_HAIRCUT:.0%} value haircut (ILLUSTRATIVE)", "ltv",
+        ews_n = 0 if "ews_remediation" in snap_ex else s["ews"]
+        if ews_n and "ews_remediation" not in sup:
+            d("ews_remediation", f"External wall remediation on {ews_n} building(s): {EWS_HAIRCUT:.0%} value haircut (ILLUSTRATIVE, modelled value)", "ltv",
               ltv(inp["amount"], base * (1 - EWS_HAIRCUT)) - ltv_clean, sig.get("ews_remediation", []), ev.get("value", []))
         n = s["haircut_items"][last]
         if n and "compliance_overdue" not in sup:
             full = pts[last]["ltv"]
-            without = ltv(inp["amount"], base * (1 - haircut(0 if "ews_remediation" in sup else s["ews"], 0)))
+            without = ltv(inp["amount"], base * (1 - haircut(0 if "ews_remediation" in sup else ews_n, 0)))
             d("compliance_overdue", f"{n} fire-risk / safety-case item(s) overdue: {ITEM_HAIRCUT:.0%} haircut each (ILLUSTRATIVE)", "ltv",
               full - without, sig.get("compliance_overdue", [])[-1:], ev.get("value", []))
         mf = inp.get("market_factor", 1.0)
@@ -497,7 +580,7 @@ def forecast_linear(inp):
                       "series": [{"month": m, "value": round(v, 3)} for m, v in zip(ms, vals)],
                       "forecast": [{"month": _add_months(ms[-1], h), **band(h), "events": []} for h in range(1, HORIZON + 1)]}
         paths[k] = path
-    status, bm, bmonth = _status(paths, cov, ms[-1])
+    status, bm, bmonth, status_metric = _status(paths, cov, ms[-1])
     out = drivers(inp, pts, metrics)
     for e in inp.get("news") or []:
         eff = e.get("effect") or {}
@@ -511,7 +594,9 @@ def forecast_linear(inp):
             out.append({"kind": "trend", "label": "6-month trend on the last 6 months of data", "effect_text": _effect_text("icr", tr),
                         "delta": {"metric": "icr", "amount": round(tr, 3)}, "signal_ids": [], "evidence_ids": []})
     out.sort(key=lambda x: -abs(x["delta"]["amount"]) * (10 if x["delta"]["metric"] == "icr" else 1))
+    kind_metric = bm or status_metric
     return {"loan_id": inp["loan_id"], "status": status, "breach_metric": bm, "breach_month": bmonth,
+            "breach_kind": breach_kind_for(kind_metric) if status != "green" else None,
             "metrics": metrics, "drivers": out}
 
 
