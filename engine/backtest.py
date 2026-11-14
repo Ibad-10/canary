@@ -1,4 +1,7 @@
-"""Backtest: forecast with data cut at 2026-05-31, score against covenant status on full data at 2026-11-12."""
+"""Backtest: forecast with data cut at 2026-05-31, score against covenant status on full data at 2026-11-12.
+
+python -m engine.backtest  scores the hybrid model and the old straight-line model side by side (no news, as in the run).
+"""
 from engine.config import AS_OF, BACKTEST_CUTOFF
 from engine.forecast import LIMITS, check
 
@@ -42,3 +45,26 @@ def run(loans, compute, cutoff=BACKTEST_CUTOFF, as_of=AS_OF):
     return {"cutoff": cutoff, "as_of": as_of, "caught": caught, "missed": missed, "false_alarms": false_alarms,
             "exact_status": exact, "loans": len(per), "per_loan": per,
             "note": "Tickets, compliance due dates and final service-charge years are cut at the cutoff; occupancy, arrears and EWS status have no history in Cortile and are read from the snapshot."}
+
+
+def compare():
+    from engine import forecast as F, loans as L, market
+    from engine.pipeline import compute
+    loans = L.build()
+    hooks = {"market": {l["id"]: market.trend(l["sector"], l["_"]["region"]) for l in loans}}
+    models = (("linear", F.forecast_linear), ("hybrid", F.forecast_hybrid), ("hybrid+challenger", F.forecast))
+    scores = {name: run(loans, lambda ls, a, m=m: compute(ls, a, hooks, m)) for name, m in models}
+    print(f"cut {BACKTEST_CUTOFF}, scored vs {AS_OF}")
+    for name, sc in scores.items():
+        mae = {k: sum(abs(p[f"{k}_predicted_m6"] - p[f"{k}_actual"]) for p in sc["per_loan"]) / sc["loans"] for k in ("icr", "ltv")}
+        print(f"{name:18} caught {sc['caught']}, missed {sc['missed']}, false alarms {sc['false_alarms']}, exact colour {sc['exact_status']}/{sc['loans']}; "
+              f"6-month error vs actual: ICR {mae['icr']:.3f}x, LTV {mae['ltv']:.2f}pp")
+    print(f"{'loan':8} {'actual':7} {'linear':7} {'hybrid':7} {'+chall':7} icr_m6 lin/hyb/actual   ltv_m6 lin/hyb/actual")
+    for a, b, c in zip(*(scores[n]["per_loan"] for n, _ in models)):
+        print(f"{a['loan_id']:8} {a['actual']:7} {a['predicted']:7} {b['predicted']:7} {c['predicted']:7} "
+              f"{a['icr_predicted_m6']:.3f}/{b['icr_predicted_m6']:.3f}/{a['icr_actual']:.3f}   {a['ltv_predicted_m6']:.2f}/{b['ltv_predicted_m6']:.2f}/{a['ltv_actual']:.2f}")
+    return scores
+
+
+if __name__ == "__main__":
+    compare()

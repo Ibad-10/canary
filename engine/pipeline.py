@@ -56,8 +56,9 @@ def make_inputs(loan, series, hooks=None):
             "evidence_ids": hooks.get("evidence_ids", {}).get(lid, {})}
 
 
-def compute(loans, as_of, hooks=None):
+def compute(loans, as_of, hooks=None, model=None):
     """Signals, forecast inputs and forecasts for every loan using only data dated <= as_of."""
+    model = model or F.forecast
     counter = itertools.count(1)
     sigs, inputs, fcs = [], [], []
     for loan in loans:
@@ -65,7 +66,7 @@ def compute(loans, as_of, hooks=None):
         inp = make_inputs(loan, series, hooks)
         sigs += rows
         inputs.append(inp)
-        fcs.append(F.forecast(inp))
+        fcs.append(model(inp))
     return sigs, inputs, fcs
 
 
@@ -226,7 +227,8 @@ def main(argv=None):
     for f in fcs:
         f["run_id"] = run_id
     tally = {k: sum(f["status"] == k for f in fcs) for k in ("red", "amber", "green")}
-    step("Forecast covenants", "Canary engine", "done", f"{tally['red']} red, {tally['amber']} amber, {tally['green']} green (ICR, LTV, occupancy; 3 and 6 months)", s)
+    step("Forecast covenants", "Canary engine", "done", f"{tally['red']} red, {tally['amber']} amber, {tally['green']} green (ICR, LTV, occupancy; monthly to 6 months: "
+         f"{sum(len(p['events']) for f in fcs for m in f['metrics'].values() for p in m.get('forecast', []))} dated event effects, AutoETS drift, {F.N_DRAWS}-draw Monte Carlo)", s)
 
     s = now_iso()
     try:

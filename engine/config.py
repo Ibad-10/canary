@@ -16,3 +16,4 @@ WEB_DATA = ROOT / "web" / "public" / "data"
 AS_OF = "2026-11-12"
 BACKTEST_CUTOFF = "2026-05-31"
 FIRST_MONTH = "2025-01-01"
+HORIZON = 6  # forecast months

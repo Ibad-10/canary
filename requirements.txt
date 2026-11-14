@@ -2,6 +2,7 @@ pandas>=2.0
 numpy>=1.26
 pyarrow>=14
 python-dotenv>=1.0
+statsforecast>=2.0
 # integrations (engine/llm, news, memo, extract, sync, api)
 requests>=2.31
 httpx>=0.27
