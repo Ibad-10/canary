@@ -9,7 +9,7 @@ const instrument = Instrument_Serif({ variable: "--font-instrument", subsets: ["
 
 export const metadata: Metadata = {
   title: "Canary · Loan early-warning desk",
-  description: "Spot landlord loans heading for a covenant breach months before the quarterly report.",
+  description: "Spot landlord loans heading for a covenant breach between quarterly reports.",
 };
 
 export const dynamic = "force-dynamic";

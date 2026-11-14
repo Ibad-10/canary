@@ -9,8 +9,11 @@ export const STATUS_NAME: Record<Status, string> = { green: "On track", amber: "
 export const STATUS_HINT: Record<Status, string> = {
   green: "No covenant limit is forecast to be hit in the next six months.",
   amber: "Heading for a cash-trap level: the lender may start holding back cash.",
-  red: "A covenant limit is forecast to be broken within six months.",
+  red: "An interest-cover breach or loan-to-value valuation risk is forecast within six months.",
 };
+/** LTV crossing its limit is a valuation risk (it hinges on a revaluation); ICR crossing is a breach. */
+export const breachWord = (metric: string | null | undefined) => (metric === "ltv" ? "Valuation risk" : "Breach");
+export const firstBreachLabel = (metric: string | null | undefined) => (metric === "ltv" ? "Valuation risk from" : "First breach");
 export const STATUS_ORDER: Status[] = ["red", "amber", "green"];
 export const STATUS_COLOR: Record<Status, { dot: string; text: string; bg: string; bd: string }> = {
   red: { dot: "#D92D20", text: "#B42318", bg: "#FEF3F2", bd: "#FECDCA" },

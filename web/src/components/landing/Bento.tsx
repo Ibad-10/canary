@@ -70,6 +70,7 @@ function Backtest({ score }: { score: LandingData["score"] }) {
         ))}
       </div>
       <p className="text-[14px] mt-4">Caught <b className="tnum">{score.caught}</b> of <b className="tnum">{score.total}</b> problem loans, <b className="tnum">{score.falseAlarms}</b> false {score.falseAlarms === 1 ? "alarm" : "alarms"}.</p>
+      <p className="text-[11px] text-sub mt-1">In-sample illustration: some building signals are current snapshots, not point-in-time.</p>
     </div>
   );
 }

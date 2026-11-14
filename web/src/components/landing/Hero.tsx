@@ -170,7 +170,7 @@ export function Hero({ data }: { data: LandingData }) {
             Early warning on covenant breaches
           </motion.span>
           <h1 className="serif text-[44px] leading-[1.04] sm:text-[56px] md:text-[72px] mt-6 max-w-[680px] text-balance">
-            <WordReveal text="See the covenant breach months before the borrower reports it." delay={0.1} />
+            <WordReveal text="See covenant risk building between quarterly reports." delay={0.1} />
           </h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}

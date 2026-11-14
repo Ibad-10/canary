@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CheckCircle2, Clock, FilePenLine, Newspaper } from "lucide-react";
 import { getBundle } from "@/lib/data";
-import { RESIDENTIAL, STATUS_COLOR, STATUS_HINT, STATUS_NAME, STATUS_ORDER, driverSentence, loanTitle, newsItems, sectorName, shortDate, topDriver } from "@/lib/labels";
+import { RESIDENTIAL, STATUS_COLOR, firstBreachLabel, STATUS_HINT, STATUS_NAME, STATUS_ORDER, driverSentence, loanTitle, newsItems, sectorName, shortDate, topDriver } from "@/lib/labels";
 import { byUrgency, countByStatus, monthYear, scoreSummary } from "@/lib/view";
 import { gbp } from "@/lib/calc";
 import Spark from "@/components/Spark";
@@ -67,7 +67,7 @@ export default async function SummaryPage() {
                   <p className="text-[13px] leading-5 text-[#3A3833] mt-2 min-h-[40px]">{d ? driverSentence(d) : "Close to a covenant limit."}</p>
                   <div className="mt-auto pt-3"><Spark forecast={f} w={220} h={36} /></div>
                   <div className="mt-3 pt-3 border-t border-line flex items-center text-[13px]">
-                    <span className="text-sub">First breach</span>
+                    <span className="text-sub">{firstBreachLabel(f.breach_metric)}</span>
                     <b className="ml-auto tnum">{f.breach_month ? monthYear(f.breach_month) : "None forecast"}</b>
                   </div>
                   <span className="mt-3 text-[13px] font-medium inline-flex items-center gap-1">Open deep dive <ArrowRight className="w-3 h-3" aria-hidden="true" /></span>
@@ -125,6 +125,7 @@ export default async function SummaryPage() {
               <>
                 <p className="serif text-[44px] leading-[48px] mt-2 tnum">{sc.caught}<span className="text-[20px] text-sub"> of {sc.total} caught</span></p>
                 <p className="text-[13px] text-sub">{sc.missed} missed · {sc.falseAlarms} false alarms</p>
+                <p className="text-[12px] text-sub mt-1">In-sample illustration: some building signals are current snapshots, until a point-in-time backtest lands.</p>
                 <Link href="/desk/log" className="text-[13px] underline decoration-dotted mt-2 inline-block">See how it was scored</Link>
               </>
             ) : (

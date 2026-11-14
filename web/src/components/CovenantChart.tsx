@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { Forecast, MetricKey, Status } from "@/lib/types";
 import { METRICS, METRIC_LABEL, fmt, monthName, monthsBetween, pp } from "@/lib/calc";
+import { breachWord } from "@/lib/labels";
 
 const COL: Record<Status, string> = { red: "#D92D20", amber: "#F79009", green: "#17B26A" };
 const W = 760, H = 290, PL = 52, PR = 96, PT = 16, PB = 32;
@@ -66,7 +67,7 @@ export default function CovenantChart({ forecast, asOf }: { forecast: Forecast; 
         <line x1={X(0)} x2={X(0)} y1={PT} y2={H - PB} stroke="#CFC8BB" strokeDasharray="2 4" />
         {limit != null && <g><line x1={PL} x2={W - PR} y1={Y(limit)} y2={Y(limit)} stroke="#D92D20" strokeWidth="1.5" strokeDasharray="6 4" /><text x={W - PR + 6} y={Y(limit) + 4} fontSize="11" fill="#B42318">Limit {tick(limit)}</text></g>}
         {trap != null && <g><line x1={PL} x2={W - PR} y1={Y(trap)} y2={Y(trap)} stroke="#F79009" strokeWidth="1.5" strokeDasharray="3 4" /><text x={W - PR + 6} y={Y(trap) + (limit != null && Math.abs(Y(trap) - Y(limit)) < 14 ? 16 : 4)} fontSize="11" fill="#B54708">Cash trap {tick(trap)}</text></g>}
-        {breachX != null && <g><line x1={X(breachX)} x2={X(breachX)} y1={PT} y2={H - PB} stroke="#D92D20" strokeOpacity=".4" /><text x={X(breachX)} y={PT + 10} textAnchor="middle" fontSize="11" fill="#B42318">Breach {monthName(forecast.breach_month, false)}</text></g>}
+        {breachX != null && <g><line x1={X(breachX)} x2={X(breachX)} y1={PT} y2={H - PB} stroke="#D92D20" strokeOpacity=".4" /><text x={X(breachX)} y={PT + 10} textAnchor="middle" fontSize="11" fill="#B42318">{breachWord(k)} {monthName(forecast.breach_month, false)}</text></g>}
         <path d={bandPath} fill={col} fillOpacity=".18" />
         <path d={line(hist)} fill="none" stroke="#1E1D1A" strokeWidth="2" strokeLinejoin="round" />
         <path d={line(fpts.map((p) => ({ x: p.x, y: p.mid })))} fill="none" stroke={col} strokeWidth="2.5" strokeLinecap="round" />

@@ -70,11 +70,11 @@ function BusinessCase({ data }: { data: LandingData }) {
           <Reveal delay={0.08} className="bg-white p-6 md:p-8">
             <p className="serif text-[52px] leading-none md:text-[64px]"><CountUp value={125} suffix="%" /></p>
             <p className="text-[14px] leading-6 mt-4"><b>The thin margin.</b> Rent must typically cover interest by 125%.{ex && need ? <> On {ex.id}, {gbpM(ex.amount)} at {ex.ratePct}% costs {gbpM(interest)} a year in interest, so the building must earn at least {gbpM(need)}. A few empty units or a repair bill closes that gap fast.</> : null}</p>
-            <p className="text-[11px] text-sub mt-3">PRA Supervisory Statement SS13/16; example uses this run's loan terms</p>
+            <p className="text-[11px] text-sub mt-3">PRA Supervisory Statement SS13/16; example uses this run&apos;s loan terms</p>
           </Reveal>
           <Reveal delay={0.16} className="bg-white p-6 md:p-8">
             <p className="serif text-[52px] leading-none md:text-[64px]">{gbpM(data.exposure.flagged)}</p>
-            <p className="text-[14px] leading-6 mt-4"><b>What's at stake here.</b> {data.atRisk} of {data.loans} loans ({gbpM(data.exposure.flagged)} of a {gbpM(data.exposure.total)} book) are flagged today from {data.signals} building signals: repairs, vacancies, arrears, overdue fire-safety items and local news.</p>
+            <p className="text-[14px] leading-6 mt-4"><b>What&apos;s at stake here.</b> {data.atRisk} of {data.loans} loans ({gbpM(data.exposure.flagged)} of a {gbpM(data.exposure.total)} book) are flagged today from {data.signals} building signals: repairs, vacancies, arrears, overdue fire-safety items and local news.</p>
             <p className="text-[11px] text-sub mt-3">Latest Canary run. Building and market data are real; the loan terms are synthetic.</p>
           </Reveal>
         </div>
@@ -82,7 +82,7 @@ function BusinessCase({ data }: { data: LandingData }) {
         {data.score && (
           <Reveal className="mt-6">
             <p className="text-[14px] leading-6 rounded-2xl border border-line bg-white px-5 py-4">
-              <b>Backtest:</b> using only data available on 31 May 2026, Canary caught {data.score.caught} of {data.score.total} loans that later moved into trouble, with {data.score.falseAlarms} false alarm{data.score.falseAlarms === 1 ? "" : "s"}.
+              <b>In-sample illustration:</b> forecasting from 31 May 2026 (some building signals are current snapshots, not point-in-time), Canary caught {data.score.caught} of {data.score.total} loans that later moved into trouble, with {data.score.falseAlarms} false alarm{data.score.falseAlarms === 1 ? "" : "s"}.
             </p>
           </Reveal>
         )}

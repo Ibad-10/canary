@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Maximize2, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import type { Evidence, Forecast, Loan, MetricKey, Signal } from "@/lib/types";
 import { fmt, gbp, sourceLabel } from "@/lib/calc";
-import { evidenceName, loanTitle, METRIC_NAME, sectorName, signalName, STATUS_COLOR, driverSentence } from "@/lib/labels";
+import { evidenceName, firstBreachLabel, loanTitle, METRIC_NAME, sectorName, signalName, STATUS_COLOR, driverSentence } from "@/lib/labels";
 import { monthYear } from "@/lib/view";
 
 type Kind = "loan" | "hub" | "signal" | "evidence" | "metric" | "other";
@@ -104,7 +104,7 @@ export default function LoanGraphInner({ loan, forecast, signals, evidence }: { 
       const mm = forecast.metrics[m]!;
       const hit = metricsHit.has(m);
       return { id: `m:${m}`, kind: "metric" as Kind, col: 3 as const, title: METRIC_NAME[m], sub: `${fmt(m, mm.m6.mid)} in 6 mo, limit ${fmt(m, mm.limit)}`, hot: live && hit, x: COLX[3], y: TOP + i * ROW,
-        detail: { what: `${METRIC_NAME[m]} is a rule in the loan agreement.`, value: `${fmt(m, mm.now)} now, ${fmt(m, mm.m6.mid)} in 6 months`, month: forecast.breach_metric === m && forecast.breach_month ? `First breach ${monthYear(forecast.breach_month)}` : undefined,
+        detail: { what: `${METRIC_NAME[m]} is a rule in the loan agreement.`, value: `${fmt(m, mm.now)} now, ${fmt(m, mm.m6.mid)} in 6 months`, month: forecast.breach_metric === m && forecast.breach_month ? `${firstBreachLabel(m)} ${monthYear(forecast.breach_month)}` : undefined,
           sources: ["Forecast engine"], effects: drivers.filter((d) => metricOf(d.delta?.metric) === m).map(driverSentence), extra: [`Limit ${fmt(m, mm.limit)}${mm.cash_trap != null ? `, cash-trap level ${fmt(m, mm.cash_trap)}` : ""}`] } };
     });
     const colMid = (col2.length ? (col2[0].y + col2[col2.length - 1].y) / 2 : TOP);

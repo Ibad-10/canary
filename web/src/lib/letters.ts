@@ -1,5 +1,5 @@
 import { METRICS, fmt, fmtCov } from "./calc";
-import { METRIC_NAME } from "./labels";
+import { METRIC_NAME, firstBreachLabel } from "./labels";
 import { monthYear } from "./view";
 import type { Forecast, MetricKey } from "./types";
 
@@ -22,7 +22,7 @@ export function letterFigures(f: Forecast | undefined): { label: string; value: 
     { label: "Limit", value: fmtCov(k, m.limit) },
   ];
   if (m.cash_trap != null) out.push({ label: "Cash trap", value: fmtCov(k, m.cash_trap) });
-  if (f.status === "red" && f.breach_month) out.push({ label: "First breach", value: monthYear(f.breach_month), tone: "red" });
+  if (f.status === "red" && f.breach_month) out.push({ label: firstBreachLabel(f.breach_metric), value: monthYear(f.breach_month), tone: "red" });
   return out;
 }
 

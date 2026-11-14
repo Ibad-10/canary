@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, Mail, Sparkles, Check, X } from "lucide-react";
 import { getBundle } from "@/lib/data";
 import { fmt, METRICS } from "@/lib/calc";
-import { METRIC_NAME, STATUS_COLOR, STATUS_NAME, STATUS_ORDER, driverSentence, loanTitle } from "@/lib/labels";
+import { METRIC_NAME, STATUS_COLOR, firstBreachLabel, STATUS_NAME, STATUS_ORDER, driverSentence, loanTitle } from "@/lib/labels";
 import { byUrgency, countByStatus, monthYear } from "@/lib/view";
 import type { MetricKey } from "@/lib/types";
 import Markdown from "@/components/Markdown";
@@ -60,7 +60,7 @@ export default async function MemoPage() {
             const m = f.metrics[k];
             return (
               <article key={f.loan_id} className="card p-4 flex flex-col" style={{ borderTop: `3px solid ${STATUS_COLOR[f.status].dot}` }}>
-                <div className="flex items-center gap-2"><StatusPill status={f.status} /><span className="ml-auto text-[12px] text-sub">{f.breach_month ? `First breach ${monthYear(f.breach_month)}` : "No breach forecast"}</span></div>
+                <div className="flex items-center gap-2"><StatusPill status={f.status} /><span className="ml-auto text-[12px] text-sub">{f.breach_month ? `${firstBreachLabel(f.breach_metric)} ${monthYear(f.breach_month)}` : "Nothing forecast"}</span></div>
                 <h2 className="text-[16px] font-semibold mt-3">{loanTitle(l)}</h2>
                 {m && <p className="text-[13px] mt-1 tnum"><span className="text-sub">{METRIC_NAME[k]}:</span> {fmt(k, m.now)} now → <b>{fmt(k, m.m6.mid)}</b> in 6 months (limit {fmt(k, m.limit)})</p>}
                 <ul className="mt-3 space-y-1.5 text-[13px] text-[#3A3833]">

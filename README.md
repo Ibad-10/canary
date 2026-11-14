@@ -1,7 +1,7 @@
 ﻿<h1 align="center">Canary</h1>
 
 <p align="center"><b>A smoke alarm for property loans.</b><br/>
-It spots broken loan rules months before the quarterly report, with proof from the buildings themselves. Twelve loans, six data and AI partners, and a human who signs off every draft.</p>
+It spots loan rules at risk between quarterly reports, with proof from the buildings themselves. Twelve loans, six data and AI partners, and a human who signs off every draft.</p>
 
 <p align="center">
   <a href="#run-it-locally">Run it locally</a> ·
