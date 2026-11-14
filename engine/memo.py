@@ -39,16 +39,35 @@ REQUESTS = {
 }
 
 
-def _pct(x):
+# Units the forecast engine emits per metric unless the metric carries its own "unit": LTV and occupancy are
+# already percent (61.9 means 61.9%), ICR is a multiple.
+UNITS = {"icr": "x", "ltv": "pct", "occupancy": "pct"}
+HORIZON_MONTHS = 6
+
+
+def _unit(metrics: dict, k: str) -> str:
+    u = ((metrics or {}).get(k) or {}).get("unit") or UNITS[k]
+    return {"%": "pct", "percent": "pct"}.get(u, u)
+
+
+def _pct(x, unit: str):
+    """Percent figure for display. unit is the field's unit: 'pct' (already percent) or 'fraction' (0.62 = 62%)."""
     if x is None:
         return None
-    return round(x * 100 if abs(x) <= 2 else x, 1)
+    if unit == "pct":
+        return round(x, 1)
+    if unit == "fraction":
+        return round(x * 100, 1)
+    raise ValueError(f"not a percent unit: {unit!r}")
 
 
 def _m(metrics: dict, k: str) -> dict:
     d = (metrics or {}).get(k) or {}
     out = {"now": d.get("now"), "limit": d.get("limit"), "cash_trap": d.get("cash_trap"),
            "forecast_6m_mid": (d.get("m6") or {}).get("mid")}
+    if UNITS[k] != "x":
+        out = {k2: _pct(v, _unit(metrics, k)) for k2, v in out.items()}
+        out["unit"] = "percent"
     return {k2: (round(v, 3) if isinstance(v, float) else v) for k2, v in out.items() if v is not None}
 
 
@@ -66,43 +85,90 @@ def _facts(loan: dict, fc: dict, evidence: list) -> dict:
         "amount_gbp": loan.get("amount_gbp"), "status": fc.get("status"),
         "breach_metric": fc.get("breach_metric"), "breach_month": fc.get("breach_month"),
         "icr": _m(fc.get("metrics"), "icr"), "ltv": _m(fc.get("metrics"), "ltv"),
-        "ltv_now_pct": _pct(((fc.get("metrics") or {}).get("ltv") or {}).get("now")),
+        "ltv_now_pct": _pct(((fc.get("metrics") or {}).get("ltv") or {}).get("now"), _unit(fc.get("metrics"), "ltv")),
         "drivers": drivers, "evidence": ev,
     }
 
 
+# a figure: not glued to a word or id (L03, D1, Q1 and snake_case keys are not figures)
+_NUM = re.compile(r"(?<![\w.])\d+(?:\.\d+)?")
+_MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?"
+_DATE_BEFORE = re.compile(rf"(?:\b{_MONTH}|\bq[1-4]|\b(?:by|in|from|until|since|before|after|during|end of|early|mid|late))[\s,]*$", re.I)
+
+
 def _numbers(s: str) -> set[str]:
-    return set(re.findall(r"\d+(?:\.\d+)?", s.replace(",", "")))
+    return {m.group() for m in _NUM.finditer(s.replace(",", ""))}
 
 
-def _check(body: str, allowed_src: str, extra: set[str]) -> list[str]:
-    allowed = _numbers(allowed_src) | extra
-    # tolerate rounding/format variants of allowed numbers
-    for n in list(allowed):
+def _variants(nums: set[str]) -> set[str]:
+    """Rounding/format variants a writer may legitimately use; amounts may be quoted in millions or thousands."""
+    out = set(nums)
+    for n in nums:
         f = float(n)
-        allowed |= {f"{f:.0f}", f"{f:.1f}", f"{f:.2f}", f"{f:.3f}", str(f).rstrip("0").rstrip(".")}
-    body = re.sub(r"\[[^\]]*\]", "", body)  # citation ids are not figures
-    bad = []
-    for n in _numbers(body):
-        v = float(n)
-        # Only years may appear without being in the payload (as_of / breach months).
-        # Do NOT allow small integers like 0 — that let a model invent "0 red".
-        if n in allowed or (v.is_integer() and 2024 <= v <= 2030):
-            continue
-        bad.append(n)
+        scaled = [f] + ([f / 1e6, f / 1e3] if abs(f) >= 1e5 else [])
+        for g in scaled:
+            out |= {f"{g:.0f}", f"{g:.1f}", f"{g:.2f}", f"{g:.3f}", f"{g:.10g}"}
+    return out
+
+
+def _loan_numbers(f: dict) -> set[str]:
+    """Numbers in one loan's facts (URLs are not facts)."""
+    f = {**f, "evidence": [{k: v for k, v in e.items() if k != "url"} for e in f.get("evidence") or []]}
+    return _variants(_numbers(json.dumps(f, default=str)))
+
+
+def _is_date(text: str, start: int, end: int, n: str) -> bool:
+    v = float(n)
+    if not (v.is_integer() and 2000 <= v <= 2100):
+        return False
+    return bool(_DATE_BEFORE.search(text[max(0, start - 14):start]) or re.match(r"-\d\d", text[end:end + 3]))
+
+
+def _refs(line: str, keys: dict[str, list[str]]) -> list[str]:
+    return [lid for lid, pats in keys.items() if any(re.search(p, line, re.I) for p in pats)]
+
+
+def _check(body: str, loans: list[dict], common: set[str]) -> list[str]:
+    """Numbers in body not backed by facts. A line that names a loan (id, citation or site name) may only use that
+    loan's figures plus `common` (run-level counts, as-of date, deadline); a loan-less line inherits the loan of
+    its paragraph/bullet, else may use any listed loan's figures. Years are free only in a date context."""
+    sets = {f["loan_id"]: _loan_numbers(f) for f in loans}
+    every = set().union(*sets.values()) if sets else set()
+    common = _variants(set(common))
+    keys = {}
+    for f in loans:
+        site = (f.get("name") or "").split(" - ")[0].split(",")[0].strip()
+        keys[f["loan_id"]] = [rf"\b{re.escape(f['loan_id'])}\b"] + ([rf"\b{re.escape(site)}\b"] if len(site) >= 3 else [])
+    bad: list[str] = []
+    for block in re.split(r"\n\s*\n", body):
+        current: list[str] = []
+        for line in block.splitlines():
+            refs = _refs(line, keys)
+            if refs:
+                current = refs
+            elif re.match(r"\s*(#|[-*•]|\d+\.\s)", line):
+                current = []
+            allowed = common | (set().union(*(sets[r] for r in current)) if current else every)
+            text = re.sub(r"\[[^\]]*\]", lambda m: " " * len(m.group()), line.replace(",", ""))
+            for m in _NUM.finditer(text):
+                n = m.group()
+                if n in allowed or _is_date(text, m.start(), m.end(), n):
+                    continue
+                if n not in bad:
+                    bad.append(n)
     return bad
 
 
-def _gen(system: str, payload: dict, extra_nums: set[str]) -> str:
+def _gen(system: str, payload: dict, loans: list[dict], common: set[str]) -> str:
     src = json.dumps(payload, default=str)
     user = "JSON facts:\n" + src
     for attempt in range(2):
         body = llm.chat(system, user)
-        bad = _check(body, src, extra_nums)
+        bad = _check(body, loans, common)
         if not bad:
             return body
-        user = (f"JSON facts:\n{src}\n\nYour previous draft used numbers not in the JSON: {', '.join(bad)}. "
-                "Rewrite it using only numbers from the JSON (remove any others).")
+        user = (f"JSON facts:\n{src}\n\nYour previous draft used numbers not in the JSON for the loan they describe: "
+                f"{', '.join(bad)}. Rewrite it using only each loan's own numbers from the JSON (remove any others).")
     raise RuntimeError(f"LLM used numbers not in the data: {bad}")
 
 
@@ -121,11 +187,13 @@ def draft(run: dict, loans: list, forecasts: list, evidence: list) -> list[dict]
     facts = [_facts(by_loan[f["loan_id"]], f, evidence) for f in forecasts if f["loan_id"] in by_loan]
     flagged = [f for f in facts if f["status"] in ("red", "amber")]
     counts = {s: sum(1 for f in facts if f["status"] == s) for s in ("red", "amber", "green")}
-    nums = _numbers(json.dumps(counts)) | _numbers(str(as_of))
+    common = _numbers(json.dumps(counts)) | _numbers(str(as_of)) | {str(HORIZON_MONTHS)}
     model = llm.MODEL_NAME  # populated after the first call; refreshed below
 
     def memo():
-        return _gen(MEMO_SYS, {"as_of": str(as_of), "counts": counts, "loans": flagged or facts[:3]}, nums)
+        shown = flagged or facts[:3]
+        return _gen(MEMO_SYS, {"as_of": str(as_of), "horizon_months": HORIZON_MONTHS, "counts": counts, "loans": shown},
+                    shown, common)
 
     reds = [f for f in facts if f["status"] == "red"]
     dl = _deadline(as_of)
@@ -135,8 +203,8 @@ def draft(run: dict, loans: list, forecasts: list, evidence: list) -> list[dict]
         for k in [d["kind"] for d in f["drivers"]] + (["news"] if f["evidence"] else []):
             reqs += [r for r in REQUESTS.get(k, []) if r not in reqs]
         reqs = reqs or ["Current rent roll", "Arrears ledger", "Latest compliance certificates"]
-        p = {**f, "requests": reqs, "deadline": dl}
-        body = _gen(CHASE_SYS, p, _numbers(dl))
+        p = {**f, "requests": reqs, "deadline": dl, "horizon_months": HORIZON_MONTHS}
+        body = _gen(CHASE_SYS, p, [f], _numbers(dl) | {str(HORIZON_MONTHS)})
         if "DRAFT - not sent" not in body:
             body = "DRAFT - not sent\n\n" + body
         return body
@@ -163,7 +231,7 @@ if __name__ == "__main__":
     fcs = [
         {"loan_id": "L01", "status": "red", "breach_metric": "icr", "breach_month": "2027-03-01",
          "metrics": {"icr": {"now": 1.38, "limit": 1.3, "cash_trap": 1.4, "m6": {"lo": 1.1, "mid": 1.21, "hi": 1.3}},
-                     "ltv": {"now": 0.61, "limit": 0.65, "cash_trap": 0.62, "m6": {"mid": 0.64}}},
+                     "ltv": {"now": 61.0, "limit": 65.0, "cash_trap": 62.0, "m6": {"mid": 64.0}}},
          "drivers": [{"kind": "arrears", "label": "Leaseholder arrears rising", "effect_text": "ICR -0.09x over 6 months",
                       "delta": {"metric": "icr", "amount": -0.09}}]},
         {"loan_id": "L02", "status": "green", "metrics": {}, "drivers": []},
