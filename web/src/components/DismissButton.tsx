@@ -15,7 +15,7 @@ export default function DismissButton({ loanId, signalKind, persist }: { loanId:
   }
   return (
     <>
-      <button onClick={go} disabled={done} className="btn mt-2 justify-center border border-[#4A4740] text-white hover:bg-white/10 w-full">
+      <button onClick={go} disabled={done} className="btn btn-ghost justify-center w-full">
         {done ? "Dismissed - Canary will remember" : "Not a concern - dismiss"}
       </button>
       {toast}
