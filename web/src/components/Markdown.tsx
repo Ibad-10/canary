@@ -1,7 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 import { Flag } from "lucide-react";
 
-function inline(text: string, keyBase: string): ReactNode[] {
+export function inline(text: string, keyBase: string): ReactNode[] {
   const out: ReactNode[] = [];
   const re = /(\[[A-Z]+-\d+\/[A-Z]\d+\]|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[\^[^\]]+\])/g;
   let last = 0, i = 0, m: RegExpExecArray | null;

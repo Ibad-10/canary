@@ -7,6 +7,8 @@ import { byUrgency, countByStatus, monthYear } from "@/lib/view";
 import type { MetricKey } from "@/lib/types";
 import Markdown from "@/components/Markdown";
 import MemoDecision from "@/components/MemoDecision";
+import BorrowerLetter from "@/components/BorrowerLetter";
+import { letterFigures } from "@/lib/letters";
 import StatusPill from "@/components/StatusPill";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +66,10 @@ export default async function MemoPage() {
                 <ul className="mt-3 space-y-1.5 text-[13px] text-[#3A3833]">
                   {(f.drivers ?? []).slice(0, 3).map((d, i) => <li key={i} className="flex gap-2"><span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_COLOR[f.status].dot }} aria-hidden="true" />{driverSentence(d)}</li>)}
                 </ul>
-                <Link href={`/desk/loan/${f.loan_id}`} className="mt-auto pt-4 text-[13px] font-medium inline-flex items-center gap-1">Open deep dive <ArrowRight className="w-3 h-3" aria-hidden="true" /></Link>
+                <div className="mt-auto pt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] font-medium">
+                  <Link href={`/desk/memo/${f.loan_id}`} className="inline-flex items-center gap-1">This loan&apos;s memo <ArrowRight className="w-3 h-3" aria-hidden="true" /></Link>
+                  <Link href={`/desk/loan/${f.loan_id}`} className="inline-flex items-center gap-1 text-sub">Open deep dive <ArrowRight className="w-3 h-3" aria-hidden="true" /></Link>
+                </div>
               </article>
             );
           })}
@@ -79,15 +84,16 @@ export default async function MemoPage() {
         </details>
 
         {chases.length > 0 && (
-          <details className="card">
+          <details className="card" open>
             <summary className="cursor-pointer list-none px-5 py-4 flex items-center gap-2 text-[15px] font-semibold"><Mail className="w-4 h-4" aria-hidden="true" />Borrower letters ({chases.length})<span className="ml-auto text-[12px] font-normal text-sub">Drafts, not sent</span></summary>
-            <div className="px-5 pb-5 space-y-3 border-t border-line pt-4">
-              {chases.map((c) => (
-                <div key={c.id} className="rounded-xl border border-line p-4">
-                  <div className="text-[13px] font-medium">{c.loan_id && loanById.get(c.loan_id) ? loanTitle(loanById.get(c.loan_id)!) : c.title}</div>
-                  <div className="text-[13px] text-sub mt-2 leading-5 whitespace-pre-line">{c.body_md}</div>
-                </div>
-              ))}
+            <div className="px-5 pb-5 space-y-4 border-t border-line pt-4">
+              {chases.map((c) => {
+                const l = c.loan_id ? loanById.get(c.loan_id) : undefined;
+                return (
+                  <BorrowerLetter key={c.id} loanId={c.loan_id} loanName={l ? loanTitle(l) : c.title} body={c.body_md}
+                    figures={letterFigures(b.forecasts.find((f) => f.loan_id === c.loan_id))} />
+                );
+              })}
             </div>
           </details>
         )}
