@@ -111,10 +111,10 @@ def corrections(c: Correction):
     except Exception as e:
         res["cognee"] = f"failed: {type(e).__name__}: {str(e)[:120]}"
     url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     try:
         if not (url and key):
-            raise RuntimeError("SUPABASE_URL / key missing")
+            raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing")
         r = httpx.post(f"{url.rstrip('/')}/rest/v1/corrections", timeout=20,
                        headers={"apikey": key, "Authorization": f"Bearer {key}", "Prefer": "return=minimal"}, json=c.model_dump())
         r.raise_for_status()

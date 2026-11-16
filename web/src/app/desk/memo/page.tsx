@@ -19,7 +19,6 @@ export default async function MemoPage() {
   const chases = b.drafts.filter((d) => d.kind === "chase");
   const loanById = new Map(b.loans.map((l) => [l.id, l]));
   const when = new Date(b.run.created_at).toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" });
-  const nextSeq = Math.max(0, ...b.steps.map((s) => s.seq)) + 1;
   const counts = countByStatus(b.forecasts);
   const flagged = byUrgency(b.forecasts, b.loans).filter((f) => f.status !== "green");
 
@@ -99,7 +98,7 @@ export default async function MemoPage() {
         )}
       </div>
       <div className="flex flex-col gap-4 self-start xl:sticky xl:top-20">
-        <MemoDecision persist={b.source !== "fixture"} readOnly={b.source === "demo"} draftId={memo.id} runId={b.run.id} status={memo.status} decidedBy={memo.decided_by} decidedAt={memo.decided_at} nextSeq={nextSeq} />
+        <MemoDecision persist={b.source !== "fixture"} readOnly={b.source === "demo"} draftId={memo.id} status={memo.status} decidedBy={memo.decided_by} decidedAt={memo.decided_at} />
         <div className="card p-4 text-[12px] text-sub leading-5">
           Every number in the memo is quoted from the forecast. The language model writes the words only.
         </div>

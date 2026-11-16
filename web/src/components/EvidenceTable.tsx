@@ -4,8 +4,8 @@ import { Database, FileText, Flag, Globe, LineChart, List, X } from "lucide-reac
 import type { Evidence, Forecast, Signal, Source } from "@/lib/types";
 import { sourceLabel, valueUnit } from "@/lib/calc";
 import { evidenceName, humanise, plainEffect, signalName, shortDate } from "@/lib/labels";
-import { writeRow } from "@/lib/supabase";
-import { useAuthor } from "@/lib/useAuthor";
+import { addCorrection } from "@/lib/actions";
+import type { WriteResult } from "@/lib/author";
 import { useToast } from "./Toast";
 
 type Row = { key: string; cat: string; finding: string; sub: string; value: string; why: string; label: string; source: Source; signalKind: string; hot: boolean };
@@ -40,8 +40,6 @@ export default function EvidenceTable({ loanId, persist, readOnly = false, forec
   const [all, setAll] = useState(false);
   const [cat, setCat] = useState<string>("all");
   const { toast, show } = useToast();
-  const author = useAuthor();
-
   const rows = useMemo<Row[]>(() => {
     const whySig = new Map<number, string>(), whyEv = new Map<number, string>();
     for (const d of forecast.drivers ?? []) {
@@ -69,7 +67,9 @@ export default function EvidenceTable({ loanId, persist, readOnly = false, forec
   async function flag() {
     if (!open) return;
     setBusy(true);
-    const r = await writeRow("corrections", { loan_id: loanId, signal_kind: open.signalKind, note: note || `Flagged as wrong: ${open.finding}`, author }, persist);
+    const r: WriteResult = persist
+      ? await addCorrection(loanId, open.signalKind, note.trim() || `Flagged as wrong: ${open.finding}`.slice(0, 1000)).catch((e: Error) => ({ ok: false, where: "supabase", error: e.message }))
+      : { ok: true, where: "local" };
     setBusy(false);
     show(r.ok ? (r.where === "supabase" ? "Correction saved to Canary's memory" : "Correction noted (sample mode, no database connected)") : `Could not save: ${r.error}`, r.ok);
     if (r.ok) { setOpen(null); setNote(""); }
@@ -138,7 +138,7 @@ export default function EvidenceTable({ loanId, persist, readOnly = false, forec
               </dl>
               {link && <a className="btn btn-ghost mt-3" href={link} target="_blank" rel="noreferrer"><Globe className="w-4 h-4" aria-hidden="true" />Open link</a>}
               <label htmlFor="flag-note" className="text-[12px] font-semibold mt-6 block text-sub">Something wrong? Tell Canary</label>
-              <textarea id="flag-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} disabled={readOnly} placeholder={readOnly ? "Read-only public demo" : "e.g. The gym is 4% of income, not 18%."} className="mt-2 w-full rounded-xl border border-line bg-white p-3 text-[13px]" />
+              <textarea id="flag-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} disabled={readOnly} placeholder={readOnly ? "Read-only public demo" : "e.g. The gym is 4% of income, not 18%."} className="mt-2 w-full rounded-xl border border-line bg-white p-3 text-[13px]" />
             </div>
             <div className="p-4 border-t border-line flex gap-2">
               <span className="flex-1 flex" title={readOnly ? "Read-only public demo" : undefined}>

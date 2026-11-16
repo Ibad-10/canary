@@ -2,12 +2,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Clock } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
+import { decideMemo } from "@/lib/actions";
 import { useToast } from "./Toast";
 import { useAuthor } from "@/lib/useAuthor";
 
-export default function MemoDecision({ draftId, runId, status, decidedBy, decidedAt, nextSeq, persist, readOnly = false }: {
-  persist: boolean; readOnly?: boolean; draftId: number; runId: string; status: string; decidedBy: string | null; decidedAt: string | null; nextSeq: number;
+export default function MemoDecision({ draftId, status, decidedBy, decidedAt, persist, readOnly = false }: {
+  persist: boolean; readOnly?: boolean; draftId: number; status: string; decidedBy: string | null; decidedAt: string | null;
 }) {
   const router = useRouter();
   const ME = useAuthor();
@@ -18,16 +18,11 @@ export default function MemoDecision({ draftId, runId, status, decidedBy, decide
   async function decide(s: "approved" | "dismissed") {
     setBusy(true);
     const now = new Date().toISOString();
-    const sb = persist ? getSupabase() : null;
     let where = "sample mode, not saved to a database";
-    if (sb) {
-      const u = await sb.from("drafts").update({ status: s, decided_by: ME, decided_at: now }).eq("id", draftId);
-      if (u.error) { setBusy(false); show(`Could not save: ${u.error.message}`, false); return; }
-      const i = await sb.from("steps").insert({
-        run_id: runId, seq: nextSeq, step: "Analyst sign-off", owner: ME, status: "done",
-        detail: s === "approved" ? "Memo approved. Chases stay drafts, nothing sent." : "Memo dismissed. Nothing sent.", started_at: now, finished_at: now,
-      });
-      where = i.error ? `decision saved, but the log entry failed: ${i.error.message}` : "saved to the log";
+    if (persist) {
+      const r = await decideMemo(draftId, s).catch((e: Error) => ({ ok: false, where: "supabase" as const, error: e.message }));
+      if (!r.ok) { setBusy(false); show(`Could not save: ${r.error}`, false); return; }
+      if (r.where === "supabase") where = r.error ?? "saved to the log";
     }
     setState({ status: s, by: ME, at: now });
     setBusy(false);

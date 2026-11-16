@@ -1,15 +1,16 @@
 "use client";
 import { useState } from "react";
-import { writeRow } from "@/lib/supabase";
+import { addCorrection } from "@/lib/actions";
+import type { WriteResult } from "@/lib/author";
 import { useToast } from "./Toast";
-import { useAuthor } from "@/lib/useAuthor";
 
 export default function DismissButton({ loanId, signalKind, persist, readOnly = false }: { loanId: string; signalKind: string; persist: boolean; readOnly?: boolean }) {
   const [done, setDone] = useState(false);
   const { toast, show } = useToast();
-  const author = useAuthor();
   async function go() {
-    const r = await writeRow("corrections", { loan_id: loanId, signal_kind: signalKind, note: "Dismissed: not a concern", author }, persist);
+    const r: WriteResult = persist
+      ? await addCorrection(loanId, signalKind, "Dismissed: not a concern").catch((e: Error) => ({ ok: false, where: "supabase", error: e.message }))
+      : { ok: true, where: "local" };
     if (r.ok) setDone(true);
     show(r.ok ? (r.where === "supabase" ? "Dismissal saved to Canary's memory" : "Dismissal noted (sample mode, no database connected)") : `Could not save: ${r.error}`, r.ok);
   }
